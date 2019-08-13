@@ -17,7 +17,7 @@ This tutorial explains setting up Java MicroProfile based applications, however,
   * [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
   * [Create an Appsody Project via the CLI](#create-an-appsody-project-via-the-cli)
   * [Writing the Code](#writing-the-code)
-  * [Deploy the Project to Knative/Kubernetes via the CLI](#deploy-the-project-to-knative/kubernetes-via-the-cli)
+  * [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
 
 ## Before You Begin
 As previously stated, this tutorial provides examples for Java MicroProfile based projects. Therefore, the pre-requisites may differ depending on which technologies your project is built upon.
@@ -43,22 +43,7 @@ To install the **Codewind Extension** for **Visual Studio Code**, you have two o
 2. Manually launch Visual Studio Code, navigate to the **Extensions** view, search for **Codewind**, and install the extension from here.
 
 ## Installing the Appsody Extension for Codewind
-To install **Appsody** for **Codewind**, download the latest release of the **Codewind Appsody Extension** from [here](https://github.com/kabanero-io/appsodyExtension/releases).
-
-Unzip or Untar the archive file to the  `codewind-workspace/.extensions` directory. By default, the **codewind-workspace** is located in your **home** directory.
-
-To enable the extension, restart the Codewind extension in Visual Studio Code. To do this, navigate to the **Explorer** view in Visual Studio Code, hover over the **Codewind** entry in the **Codewind** dropdown, and toggle the slider to the right of the entry.
-
-Once Codewind has been restarted, you will need to add the **Appsody Templates**. To do this, make a `POST` request to the following REST API endpoint http://localhost:9090/api/v1/templates/repositories .
-
-This can be done via **curl** or [**Postman**](https://www.getpostman.com/). For example:
-
-```
-$ curl "http://localhost:9090/api/v1/templates/repositories" \
--X POST \
--d '{ "url": "https://raw.githubusercontent.com/kabanero-io/codewind-appsody-templates/master/devfiles/index.json", "description": "Appsody templates" }' \
--H "Content-Type: application/json"
-```
+To install **Appsody** for **Codewind**, follow the instructions from the **Appsody Codewind Extension** [repository](https://github.com/kabanero-io/appsodyExtension#installing-the-appsody-extension-on-codewind)
 
 ## Writing and Deploying the Project
 To get started with writing the project, hover over the **Projects** entry underneath **Codewind** in **Visual Studio Code** and press the **+** icon to create a new project.
@@ -114,12 +99,7 @@ $ appsody
 ### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
 
-1. Open the .appsody.yaml configuration file that the **Appsody CLI** is using in an editor (by default, this file is located in your home directory, under the .appsody folder.
-
-2. Change the home property to point the **Codewind's** copy of the **Appsody** configuration:
-```
-home: /some_path/codewind-workspace/.appsody
-```
+To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#installing-the-appsody-extension-on-codewind).
 
 ### Create an Appsody Project via the CLI
 Now that the CLI tool is correctly installed, we can now begin to create **Appsody** projects via the command line. To view the list of supported project stacks, enter the following command into your terminal:
@@ -136,6 +116,8 @@ nodejs           	0.2.2  	Runtime for Node.js applications
 swift            	0.1.0  	Runtime for Swift applications             
 java-microprofile	0.2.4  	Eclipse MicroProfile using OpenJ9 and Maven
 ```
+
+To view the most current list of supported stacks, scroll down to the [Application Stacks](https://appsody.dev/) section on the **Appsody** homepage.
 
 For this tutorial, we will create a **Java MicroProfile** project, by executing the following commands:
 ```
@@ -193,7 +175,7 @@ Your endpoint is working!
 Congratulations, you have learnt how to develop an application with **Kabanero** using the **CLI**!
 
 
-### Deploy the Project to Knative/Kubernetes via the CLI
+### Deploy the Project to Knative or Kubernetes via the CLI
 To deploy the project using these technologies, navigate to the project's folder via the command line, and execute the following command:
 
 ```
