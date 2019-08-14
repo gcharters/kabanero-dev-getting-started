@@ -1,26 +1,31 @@
 # Kabanero Developer Experience - Getting Started
-This document will explain how to set up Kabanero for both Visual Studio Code and the CLI and use it to quickly build and deploy applications to Kubernetes and Knative, without worrying about manually configuring your deployments. With Kabanero, developers can solely focus on developing their applications, letting the Kabanero tools do the heavy lifting of building and packaging deployment-ready containers.
 
-This tutorial explains setting up Java MicroProfile based applications, however, Kabanero supports Go, Node.js, Python and various other project types. For more information, see [Kabanero.io](https://kabanero.io/).
+Kabanero is an open source project focused on bringing together foundational open source technologies into a framework for developing and deploying modern cloud-native applications.  The Kabanero developer experience leverages the Appsody and Eclipse Codewind open source projects enabling developers to use project 'templates' to rapidly create new cloud-native applications, develop and build them in a curated container 'stack' environment and deploy them to Knative/Kubernetes all without the need for container or Kubernetes skills.
+
+This tutorial will give you an introduction to the Kabanerio developer experience. You'll create and deploy a Java MicroProfile based cloud-native application, however, Kabanero provides a number of stacks, including Node.js and Spring Boot and is extensible so others can easily be added. For more information, see [Appsody.dev](https://appsody.dev/).
+
+At the end of this tutorial, you should have a good understanding of the Kabanerio developer experience through the use of Appsody and Eclipse Codewind.  You know how to create a new applications, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of developing the code.
+
 
 ## Table of Contents
-* [Kabanero Developer Experience - Getting Started](#kabanero-developer-experience---getting-started)
-* [Table of Contents](#table-of-contents)
-* [Before You Begin](#before-you-begin)
-  * [Pre-requisites](#pre-requisites)
-* [Visual Studio Code Kabanero Setup](#visual-studio-code-kabanero-setup)
-  * [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
-  * [Installing the Appsody Extension for Codewind](#installing-the-appsody-extension-for-codewind)
-  * [Writing and Deploying the Project](#writing-and-deploying-the-project)
-* [CLI Kabanero Setup](#cli-kabanero-setup)
-  * [Installing the Appsody CLI](#installing-the-appsody-cli)
-  * [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
-  * [Create an Appsody Project via the CLI](#create-an-appsody-project-via-the-cli)
-  * [Writing the Code](#writing-the-code)
-  * [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
+- [Kabanero Developer Experience - Getting Started](#kabanero-developer-experience---getting-started)
+  - [Table of Contents](#table-of-contents)
+  - [Before You Begin](#before-you-begin)
+    - [Pre-requisites](#pre-requisites)
+    - [Enable Kubernetes](#enable-kubernetes)
+  - [Visual Studio Code Kabanero Setup](#visual-studio-code-kabanero-setup)
+    - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
+  - [Installing the Appsody Extension for Codewind](#installing-the-appsody-extension-for-codewind)
+  - [CLI Kabanero Setup](#cli-kabanero-setup)
+    - [Installing the Appsody CLI](#installing-the-appsody-cli)
+    - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
+  - [Writing and Deploying the Project](#writing-and-deploying-the-project)
+    - [Create an Appsody Project via the CLI](#create-an-appsody-project-via-the-cli)
+    - [Writing the Code](#writing-the-code)
+    - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
 
 ## Before You Begin
-As previously stated, this tutorial provides examples for Java MicroProfile based projects. Therefore, the pre-requisites may differ depending on which technologies your project is built upon.
+Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
 
 ### Pre-requisites
 * [A Java 8 JDK Installation](https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=openj9)
@@ -30,20 +35,45 @@ As previously stated, this tutorial provides examples for Java MicroProfile base
   * [MacOS Docker Installation](https://docs.docker.com/docker-for-mac/)
 * [Visual Studio Code](https://code.visualstudio.com/)
 
-### Docker Setup
-As a side note in Docker desktop, you will need to manually enable Kubernetes. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
+### Enable Kubernetes
+You will need to enable Kubernetes as this is off by default in Docker Desktop. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
 
 ## Visual Studio Code Kabanero Setup
 
 ### Installing the Codewind Extension for Visual Studio Code
+Eclipse Codewind provides a set of extension to IDEs for doing cloud-native application development.  The enable a full developer/debug cycle with incremental build where all the code is built and run inside a container.  This means that the likelihood of issues due to different development, build and production environments is vastly reduced.
+
+Although Codewind is an Eclipse project, it's not limited to the Eclipse IDE and in this tutorial you will use Codewin inside Visual Studio Code.
+
+Codewind requires Docker, so before you begin, ensure your Docker install is complete and running.
+
 To install the **Codewind Extension** for **Visual Studio Code**, you have two options.
 
-1. Install it via the browser by following [this link](https://marketplace.visualstudio.com/items?itemName=IBM.codewind). The rest will be handled for you.
+1. Install using the **Install** button on [this page](https://marketplace.visualstudio.com/items?itemName=IBM.codewind).
 
 2. Manually launch Visual Studio Code, navigate to the **Extensions** view, search for **Codewind**, and install the extension from here.
 
 ## Installing the Appsody Extension for Codewind
+
+Codewind comes with a set of pre-defined `templates` for various project types, but the Kabanero recommendation is to use those provided by Appsody.  To do this requires an Appsody extension to Codewind.
+
 To install **Appsody** for **Codewind**, follow the instructions from the **Appsody Codewind Extension** [repository](https://github.com/kabanero-io/appsodyExtension#installing-the-appsody-extension-on-codewind)
+
+## CLI Kabanero Setup
+
+### Installing the Appsody CLI
+Depending on your operating system, the installation process for the **Appsody CLI** will differ. To correctly install **Appsody** for your operating system, view the following [link](https://appsody.dev/docs/getting-started/installation).
+
+Verify that the CLI tool is installed correctly by executing the following into your terminal:
+
+```
+$ appsody
+```
+
+### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
+While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
+
+To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
 ## Writing and Deploying the Project
 To get started with writing the project, hover over the **Projects** entry underneath **Codewind** in **Visual Studio Code** and press the **+** icon to create a new project.
@@ -85,21 +115,6 @@ Your endpoint is working!
 
 Congratulations! You have learnt how to develop an  application with **Codewind** and **Appsody**, without worrying about the containerisation and packaging of the application. If you already have **Appsody** installed via the **CLI**, we recommend that you [share the Appsody configuration between the CLI and Visual Studio Code](#), to keep all your **Appsody** projects together.
 
-## CLI Kabanero Setup
-
-### Installing the Appsody CLI
-Depending on your operating system, the installation process for the **Appsody CLI** will differ. To correctly install **Appsody** for your operating system, view the following [link](https://appsody.dev/docs/getting-started/installation).
-
-Verify that the CLI tool is installed correctly by executing the following into your terminal:
-
-```
-$ appsody
-```
-
-### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
-While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
-
-To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
 ### Create an Appsody Project via the CLI
 Now that the CLI tool is correctly installed, we can now begin to create **Appsody** projects via the command line. To view the list of supported project stacks, enter the following command into your terminal:
