@@ -99,7 +99,7 @@ $ appsody
 ### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
 
-To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#installing-the-appsody-extension-on-codewind).
+To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
 ### Create an Appsody Project via the CLI
 Now that the CLI tool is correctly installed, we can now begin to create **Appsody** projects via the command line. To view the list of supported project stacks, enter the following command into your terminal:
