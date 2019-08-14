@@ -31,7 +31,7 @@ As previously stated, this tutorial provides examples for Java MicroProfile base
 * [Visual Studio Code](https://code.visualstudio.com/)
 
 ### Docker Setup
-As a side note in Docker desktop, you may need to manually enable Kubernetes. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
+As a side note in Docker desktop, you will need to manually enable Kubernetes. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
 
 ## Visual Studio Code Kabanero Setup
 
