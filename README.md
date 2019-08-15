@@ -85,7 +85,7 @@ We're going to start by creating a new MicroProfile project in Codewind. These f
 
 To get started with writing the project, hover over the **Projects** entry underneath **Codewind** in **Visual Studio Code** and press the **+** icon to create a new project.
 
-![Create New Project](/images/new-project.png)
+![Create New Project](/images/new-project.png){:height="50%" width="50%"}
 
 From the list which appears, select the **Appsody Java MicroProfile Template**, and give the project a name. This project contains all the boiler-plate code to get started with developing Java MicroProfile projects with **Appsody** and **Codewind**.
 
