@@ -85,13 +85,15 @@ We're going to start by creating a new MicroProfile project in Codewind. These f
 
 To get started with writing the project, hover over the **Projects** entry underneath **Codewind** in **Visual Studio Code** and press the **+** icon to create a new project.
 
-<img src="images/new-project.png" width="50%" height="50%">
+<img src="images/new-project.png" width="40%" height="40%">
 
-From the list which appears, select the **Appsody Java MicroProfile Template**, and give the project a name. This project contains all the boiler-plate code to get started with developing Java MicroProfile projects with **Appsody** and **Codewind**.
+From the list which appears, select the **Appsody Java MicroProfile template**, and give the project a name. This project contains all the boiler-plate code to get started with developing a Java MicroProfile application.
 
-The project will then be imported and deployed via Docker - to observe this, **right click** on the project, and select **Show all logs**.
+The project will be built and started inside a container.  To see the progrees you can **right click** on the project, and select **Show all logs**.  Eventually, the status of the project should change to **Running**.
 
-To view the application in your browser, select the **Open App** icon next to the project's name.
+<img src="images/new-running.png" width="50%" height="50%">
+
+To access the application endpoint in a browser, select the **Open App** icon <img src="images/open-app.png" width="3%" height="3%"> next to the project's name.
 
 Any changes you make to your code will automatically be built and deployed by **Codewind** and **Appsody**, and can be observed in your browser.
 
