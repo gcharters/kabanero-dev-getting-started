@@ -13,13 +13,13 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
   - [Before You Begin](#before-you-begin)
     - [Pre-requisites](#pre-requisites)
     - [Enable Kubernetes](#enable-kubernetes)
-  - [Visual Studio Code Kabanero Setup](#visual-studio-code-kabanero-setup)
-    - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
-  - [Installing the Appsody Extension for Codewind](#installing-the-appsody-extension-for-codewind)
-  - [CLI Kabanero Setup](#cli-kabanero-setup)
-    - [Installing the Appsody CLI](#installing-the-appsody-cli)
-    - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
-  - [Writing and Deploying the Project](#writing-and-deploying-the-project)
+    - [Visual Studio Code Kabanero Setup](#visual-studio-code-kabanero-setup)
+      - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
+    - [Installing the Appsody Extension for Codewind](#installing-the-appsody-extension-for-codewind)
+    - [CLI Kabanero Setup](#cli-kabanero-setup)
+      - [Installing the Appsody CLI](#installing-the-appsody-cli)
+      - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
+  - [Creating a new Codewind Project](#creating-a-new-codewind-project)
     - [Create an Appsody Project via the CLI](#create-an-appsody-project-via-the-cli)
     - [Writing the Code](#writing-the-code)
     - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
@@ -28,6 +28,9 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
 
 ### Pre-requisites
+
+You need to install the following pre-requisites to complete this tutorial.
+
 * [A Java 8 JDK Installation](https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=openj9)
 * [Apache Maven](https://maven.apache.org/)
 * Docker
@@ -36,11 +39,12 @@ Before you get started, there are a number of pre-reqs you'll need to install.  
 * [Visual Studio Code](https://code.visualstudio.com/)
 
 ### Enable Kubernetes
-You will need to enable Kubernetes as this is off by default in Docker Desktop. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
 
-## Visual Studio Code Kabanero Setup
+You will need to enable Kubernetes as this is disabled by default in Docker Desktop. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
 
-### Installing the Codewind Extension for Visual Studio Code
+### Visual Studio Code Kabanero Setup
+
+#### Installing the Codewind Extension for Visual Studio Code
 Eclipse Codewind provides a set of extension to IDEs for doing cloud-native application development.  The enable a full developer/debug cycle with incremental build where all the code is built and run inside a container.  This means that the likelihood of issues due to different development, build and production environments is vastly reduced.
 
 Although Codewind is an Eclipse project, it's not limited to the Eclipse IDE and in this tutorial you will use Codewin inside Visual Studio Code.
@@ -53,15 +57,15 @@ To install the **Codewind Extension** for **Visual Studio Code**, you have two o
 
 2. Manually launch Visual Studio Code, navigate to the **Extensions** view, search for **Codewind**, and install the extension from here.
 
-## Installing the Appsody Extension for Codewind
+### Installing the Appsody Extension for Codewind
 
 Codewind comes with a set of pre-defined `templates` for various project types, but the Kabanero recommendation is to use those provided by Appsody.  To do this requires an Appsody extension to Codewind.
 
 To install **Appsody** for **Codewind**, follow the instructions from the **Appsody Codewind Extension** [repository](https://github.com/kabanero-io/appsodyExtension#installing-the-appsody-extension-on-codewind)
 
-## CLI Kabanero Setup
+### CLI Kabanero Setup
 
-### Installing the Appsody CLI
+#### Installing the Appsody CLI
 Depending on your operating system, the installation process for the **Appsody CLI** will differ. To correctly install **Appsody** for your operating system, view the following [link](https://appsody.dev/docs/getting-started/installation).
 
 Verify that the CLI tool is installed correctly by executing the following into your terminal:
@@ -70,13 +74,18 @@ Verify that the CLI tool is installed correctly by executing the following into 
 $ appsody
 ```
 
-### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
+#### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
 
 To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
-## Writing and Deploying the Project
+## Creating a new Codewind Project
+
+We're going to start by creating a new MicroProfile project in Codewind. These first steps are the same for all the supported project types.  As we said before, we're going to use the templates and stacks provided by Appsody.
+
 To get started with writing the project, hover over the **Projects** entry underneath **Codewind** in **Visual Studio Code** and press the **+** icon to create a new project.
+
+![Create New Project](/images/new-project.png)
 
 From the list which appears, select the **Appsody Java MicroProfile Template**, and give the project a name. This project contains all the boiler-plate code to get started with developing Java MicroProfile projects with **Appsody** and **Codewind**.
 
