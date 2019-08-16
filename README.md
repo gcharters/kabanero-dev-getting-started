@@ -93,15 +93,19 @@ The project will be built and started inside a container.  To see the progrees y
 
 <img src="images/new-running.png" width="50%" height="50%">
 
-To access the application endpoint in a browser, select the **Open App** icon <img src="images/open-app.png" width="3%" height="3%"> next to the project's name.
+To access the application endpoint in a browser, select the **Open App** icon <img src="images/open-app.png" width="3%" height="3%"> next to the project's name.  You call also open the app by right clicking on the project and selecting **Open App**.
 
-Any changes you make to your code will automatically be built and deployed by **Codewind** and **Appsody**, and can be observed in your browser.
+Let's take a look at the code.  In the **VS Code EXPLORER** you should see an entry with your project name.  Expand this and the sub-twisties to show all the files created from the Appsody template
+
+<img src="images/template-code.png" width="50%" height="50%">
+
+Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser. Let's see this in action.
 
 To illustrate this, we will create a basic JAX-RS resource with a GET method, which will return a print statement when the endpoint is called. First, to get a better development view, right click on the project in the **Explorer** in **Visual Studio Code**, and press **Open Folder as Workspace**. The project and its directories will now appear in the **Explorer**.
 
 Navigate to the `src/main/java/dev/appsody/starter` directory, and create a file called `StarterResource.java` - this will be our JAX-RS resource. Populate the file with the following code:
 
-```
+```Java
 package dev.appsody.starter;
 
 import javax.ws.rs.GET;
