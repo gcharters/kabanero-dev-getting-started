@@ -1,10 +1,10 @@
 # Kabanero Developer Experience - Getting Started
 
-Kabanero is an open source project focused on bringing together foundational open source technologies into a framework for developing and deploying modern cloud-native applications.  The Kabanero developer experience leverages the Appsody and Eclipse Codewind open source projects enabling developers to use project 'templates' to rapidly create new cloud-native applications, develop and build them in a curated container 'stack' environment and deploy them to Knative/Kubernetes all without the need for container or Kubernetes skills.
+Kabanero is an open source project focused on bringing together key foundational open source technologies into a framework for developing and deploying modern cloud-native applications.  The Kabanero developer experience leverages the Appsody and Eclipse Codewind open source projects enabling developers to use project 'templates' to rapidly create new cloud-native applications, develop and build them in a curated container 'stack' environment and deploy them to Knative/Kubernetes all without the need for container or Kubernetes skills.
 
 This tutorial will give you an introduction to the Kabanerio developer experience. You'll create and deploy a Java MicroProfile based cloud-native application, however, Kabanero provides a number of stacks, including Node.js and Spring Boot and is extensible so others can easily be added. For more information, see [Appsody.dev](https://appsody.dev/).
 
-At the end of this tutorial, you should have a good understanding of the Kabanerio developer experience through the use of Appsody and Eclipse Codewind.  You know how to create a new applications, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of developing the code.
+At the end of this tutorial, you should have a good understanding of the Kabanerio developer experience through the use of Appsody and Eclipse Codewind.  You'll know how to create a new application, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of writing the code.
 
 
 ## Table of Contents
@@ -19,6 +19,7 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [CLI Kabanero Setup](#cli-kabanero-setup)
       - [Installing the Appsody CLI](#installing-the-appsody-cli)
       - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
+    - [Priming the Maven and Docker caches - Denilson to update](#priming-the-maven-and-docker-caches---denilson-to-update)
   - [Creating a new Codewind Project](#creating-a-new-codewind-project)
     - [Create an Appsody Project via the CLI](#create-an-appsody-project-via-the-cli)
     - [Writing the Code](#writing-the-code)
@@ -79,6 +80,30 @@ While this is optional, it is recommended. Rather than having **Appsody CLI** pr
 
 To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
+### Priming the Maven and Docker caches - Denilson to update
+
+This step will bring in large images into your local docker images repository. The cached images will save you time and bandwidth at the beginning of the workshop.
+
+```
+tmp_dir=/tmp/workshop
+mkdir -p ${tmp_dir}
+cd ${tmp_dir}
+git clone https://github.com/gcharters/stacks.git
+
+cd ${tmp_dir}/stacks
+./ci/build.sh . /experimental/java-microprofile-dev-mode
+```
+
+This step will download most of the Java dependencies into your local disk. The cached dependencies will also save you time and bandwidth at the beginning of the workshop.
+
+```
+cd ${tmp_dir}/stacks/experimental/java-microprofile-dev-mode
+mkdir -p ~/.m2
+// TODO use appsody run and ctrl-C
+docker run --rm -it -v ~/.m2:/root/.m2 -v "$PWD/image/project:/project" maven mvn -f /project/pom.xml dependency:resolve
+```
+
+
 ## Creating a new Codewind Project
 
 We're going to start by creating a new MicroProfile project in Codewind. These first steps are the same for all the supported project types.  As we said before, we're going to use the templates and stacks provided by Appsody.
@@ -95,15 +120,13 @@ The project will be built and started inside a container.  To see the progrees y
 
 To access the application endpoint in a browser, select the **Open App** icon <img src="images/open-app.png" width="3%" height="3%"> next to the project's name.  You call also open the app by right clicking on the project and selecting **Open App**.
 
-Let's take a look at the code.  In the **VS Code EXPLORER** you should see an entry with your project name.  Expand this and the sub-twisties to show all the files created from the Appsody template
+Let's take a look at the code.  In the **VS Code EXPLORER** you should see an entry with your project name.  Expand this and the sub-twisties to show all the files created from the Appsody template (Note, the template is not intended to be a sample as most people would end up having to delete the code each time, it aims to provide the starter code, server configuration and build to which you can add your code).
 
 <img src="images/template-code.png" width="50%" height="50%">
 
-Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser. Let's see this in action.
+The main Java files are **StarterLivenessCheck**, **StarterReadinessCheck** and **StarterApplication**.  The first two provide the outlines for `liveness` and `readiness` checks that can be hooked up to `Kubernetes` liveness and readiness probes.  These are implemented using MicroProflie Health.  The third file is a JAX-RS application, which provides the `Application Path` for your REST API.
 
-To illustrate this, we will create a basic JAX-RS resource with a GET method, which will return a print statement when the endpoint is called. First, to get a better development view, right click on the project in the **Explorer** in **Visual Studio Code**, and press **Open Folder as Workspace**. The project and its directories will now appear in the **Explorer**.
-
-Navigate to the `src/main/java/dev/appsody/starter` directory, and create a file called `StarterResource.java` - this will be our JAX-RS resource. Populate the file with the following code:
+Let's add a REST service to your application.  Navigate to the `src/main/java/dev/appsody/starter` directory, and create a file called `StarterResource.java` - this will be our JAX-RS resource. Populate the file with the following code and save it:
 
 ```Java
 package dev.appsody.starter;
@@ -115,12 +138,15 @@ import javax.ws.rs.Path;
 public class StarterResource {
 
     @GET
-    public void getRequest() {
-        System.out.println("Your endpoint is working!");
+    public String getRequest() {
+        return "StarterResource response";
     }
-
 }
 ```
+
+Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser. Let's see this in action.
+
+To illustrate this, we will create a basic JAX-RS resource with a GET method, which will return a print statement when the endpoint is called. First, to get a better development view, right click on the project in the **Explorer** in **Visual Studio Code**, and press **Open Folder as Workspace**. The project and its directories will now appear in the **Explorer**.
 
 As stated previously, any changes to your project will be picked up and built automatically. Therefore, if you click the **Open App** icon, and append `/starter/resource` to URL and hit this endpoint, you should see the following output in the **Visual Studio Code** logs:
 
