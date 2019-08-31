@@ -85,7 +85,7 @@ To share the Appsody configuration, follow the instructions at [this repository]
 This step will bring in large images into your local docker images repository. The cached images will save you time and bandwidth at the beginning of the workshop.
 
 ```
-curl -sL https://github.com/nastacio/stacks-workshop-util/releases/download/0.0.1/appsody-prime-caches.sh | bash
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/appsody-prime-caches.sh | bash
 ```
 
 This step will download most of the Java dependencies into your local disk. The cached dependencies will also save you time and bandwidth at the beginning of the workshop.
