@@ -89,18 +89,12 @@ While this is optional, it is recommended. Rather than having **Appsody CLI** pr
 
 To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
-### Priming the Maven and Docker caches - Denilson to update
+### Priming the Maven and Docker caches
 
 This step will bring in large images into your local docker images repository. The cached images will save you time and bandwidth at the beginning of the workshop.
 
 ```
-tmp_dir=/tmp/workshop
-mkdir -p ${tmp_dir}
-cd ${tmp_dir}
-git clone https://github.com/gcharters/stacks.git
-
-cd ${tmp_dir}/stacks
-./ci/build.sh . /experimental/java-microprofile-dev-mode
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/appsody-prime-caches.sh | bash
 ```
 
 This step will download most of the Java dependencies into your local disk. The cached dependencies will also save you time and bandwidth at the beginning of the workshop.
