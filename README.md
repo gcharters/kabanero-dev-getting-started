@@ -91,19 +91,10 @@ To share the Appsody configuration, follow the instructions at [this repository]
 
 ### Priming the Maven and Docker caches
 
-This step will bring in large images into your local docker images repository. The cached images will save you time and bandwidth at the beginning of the workshop.
+This step will bring in large images into your local docker images repository. The cached content will save you valuable time at the beginning of the workshop.
 
 ```
 curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/appsody-prime-caches.sh | bash
-```
-
-This step will download most of the Java dependencies into your local disk. The cached dependencies will also save you time and bandwidth at the beginning of the workshop.
-
-```
-cd ${tmp_dir}/stacks/experimental/java-microprofile-dev-mode
-mkdir -p ~/.m2
-// TODO use appsody run and ctrl-C
-docker run --rm -it -v ~/.m2:/root/.m2 -v "$PWD/image/project:/project" maven mvn -f /project/pom.xml dependency:resolve
 ```
 
 
@@ -201,7 +192,8 @@ We're going to use a custom stack created for this workshop.  Anybody can write 
 As part of the setup for the workshop, you cloned a github repository and built a project that contained the new stack. Let's go to the output of that build:
 
 ```
-cd ${tmp_dir}/stacks/ci/assets
+workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
+cd ${workshop_dir}/stacks/ci/assets
 ```
 
 If you list the contents of that directory, you should see something like this:
@@ -235,7 +227,7 @@ This contains the stack packages (.tar.gz files) and local/remote repository fil
 Let's add the local repository definition to the set of repositories that the Appsody CLI can use:
 
 ```
-appsody repo add workshop file://$(PWD)/experimental-index-local.yaml
+appsody repo add workshop file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Check the repository has been added:
@@ -251,7 +243,7 @@ charters@Grahams-MBP-2 assets (master) $ appsody repo list
 
 NAME       	URL                                                                                      
 *appsodyhub	https://raw.githubusercontent.com/appsody/stacks/master/index.yaml                       
-workshop   	file:///Users/charters/Repositories/github/stacks/ci/assets/experimental-index-local.yaml
+workshop   	file:///Users/charters/workspace/kabanero-workshop/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Let's see what stacks we now have available:
@@ -282,8 +274,8 @@ We're now ready to start creating applications using the new Appsody stack.
 Make a directory to contain your project:
 
 ```
-mkdir ~/kabanero-workshop
-cd ~/kabanero-workshop
+mkdir -p ~/workspace/kabanero-workshop/java-example
+cd ~/workspace/kabanero-workshop/java-example
 ```
 
 Create the new project.  This project will using the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
