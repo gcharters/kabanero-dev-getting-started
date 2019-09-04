@@ -2,9 +2,9 @@
 
 Kabanero is an open source project focused on bringing together key foundational open source technologies into a framework for developing and deploying modern cloud-native applications.  The Kabanero developer experience leverages the Appsody and Eclipse Codewind open source projects enabling developers to use project 'templates' to rapidly create new cloud-native applications, develop and build them in a curated container 'stack' environment and deploy them to Knative/Kubernetes all without the need for container or Kubernetes skills.
 
-This tutorial will give you an introduction to the Kabanerio developer experience. You'll create and deploy a Java MicroProfile based cloud-native application, however, Kabanero provides a number of stacks, including Node.js and Spring Boot and is extensible so others can easily be added. For more information, see [Appsody.dev](https://appsody.dev/).
+This tutorial will give you an introduction to the Kabanero developer experience. You'll create and deploy a Java MicroProfile based cloud-native application, however, Kabanero provides a number of stacks, including Node.js and Spring Boot and is extensible so others can easily be added. For more information, see [Appsody.dev](https://appsody.dev/).
 
-At the end of this tutorial, you should have a good understanding of the Kabanerio developer experience through the use of Appsody and Eclipse Codewind.  You'll know how to create a new application, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of writing the code.
+At the end of this tutorial, you should have a good understanding of the Kabanero developer experience through the use of Appsody and Eclipse Codewind.  You'll know how to create a new application, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of writing the code.
 
 
 ## Table of Contents
@@ -17,7 +17,7 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
       - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
     - [Installing the Appsody CLI](#installing-the-appsody-cli)
       - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
-    - [Priming the Maven and Docker caches](#priming-the-maven-and-docker-caches)
+    - [Pre-requisite checks and caching of large images](#pre-requisite-checks-and-caching-of-large-images)
   - [Developing Cloud-native applications - Appsody](#developing-cloud-native-applications---appsody)
     - [Getting to know Appsody](#getting-to-know-appsody)
     - [Creating a new Project with Appsody](#creating-a-new-project-with-appsody)
@@ -81,16 +81,17 @@ While this is optional, it is recommended. Rather than having **Appsody CLI** pr
 
 To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
-### Priming the Maven and Docker caches
+### Pre-requisite checks and caching of large images
 
-This step will bring in large images into your local docker images repository. The cached images will save you time and bandwidth at the beginning of the workshop.
+This step will ensure your environment has all the prerequisites installed and running.
+
+In addition to checking prerequisites, this step will also cache large images into your local system. The cached content will save you valuable time at the beginning of the workshop.
 
 ```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/appsody-prime-caches.sh | bash
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/workshop-setup.sh | bash
 ```
 
 *TODO*: Denilson - Add instructions to clone the Stack and build it ready for later.
-
 
 
 ## Developing Cloud-native applications - Appsody
@@ -187,7 +188,8 @@ We're going to use a custom stack created for this workshop.  Anybody can write 
 As part of the setup for the workshop, you cloned a github repository and built a project that contained the new stack. Let's go to the output of that build:
 
 ```
-cd ${tmp_dir}/stacks/ci/assets
+workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
+cd ${workshop_dir}/stacks/ci/assets
 ```
 
 If you list the contents of that directory, you should see something like this:
@@ -221,7 +223,7 @@ This contains the stack packages (.tar.gz files) and local/remote repository fil
 Let's add the local repository definition to the set of repositories that the Appsody CLI can use:
 
 ```
-appsody repo add workshop file://$(PWD)/experimental-index-local.yaml
+appsody repo add workshop file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Check the repository has been added:
@@ -237,7 +239,7 @@ charters@Grahams-MBP-2 assets (master) $ appsody repo list
 
 NAME       	URL                                                                                      
 *appsodyhub	https://raw.githubusercontent.com/appsody/stacks/master/index.yaml                       
-workshop   	file:///Users/charters/Repositories/github/stacks/ci/assets/experimental-index-local.yaml
+workshop   	file:///Users/charters/workspace/kabanero-workshop/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Let's see what stacks we now have available:
@@ -268,8 +270,8 @@ We're now ready to start creating applications using the new Appsody stack.
 Make a directory to contain your project:
 
 ```
-mkdir ~/kabanero-workshop
-cd ~/kabanero-workshop
+mkdir -p ~/workspace/kabanero-workshop/java-example
+cd ~/workspace/kabanero-workshop/java-example
 ```
 
 Create the new project.  This project will using the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
