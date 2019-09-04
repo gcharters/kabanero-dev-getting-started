@@ -99,7 +99,24 @@ function checksPrereqs {
         fi
         prereqFailed=1
     else
-        echo "INFO: docker CLI installed: $(docker -v)" 
+        echo "INFO: docker CLI installed" 
+    fi
+
+    dockerRunningPrereqFailed=0
+    docker ps &> /dev/null || dockerRunningPrereqFailed=1
+    if [ ${dockerRunningPrereqFailed} -eq 1 ]; then
+        echo "ERROR: docker daemon is not running."
+        prereqFailed=1
+    else
+        echo "INFO: docker daemon is running"
+    fi
+
+    docker_major_version=$(docker -v | cut -d " " -f 3 | cut -d "." -f 1)
+    if [[ "${docker_major_version}" <  "19" ]]; then
+        echo "ERROR: docker version [$(docker -v)] does not support built-in kubernetes. Minimum is version 18.06."
+        prereqFailed=1
+    else
+        echo "INFO: docker version [$(docker -v | cut -d ' ' -f 3 | cut -d ',' -f 1)] meets minimum requirements."
     fi
 
     kubectlPrereqFailed=0
@@ -108,31 +125,43 @@ function checksPrereqs {
         echo "ERROR: kubectl CLI cannot be found in the PATH environment variable."
         prereqFailed=1
     else
-        echo "INFO: kubectl CLI installed: $(kubectl version --short=true | tr -s "\n" "/")"
-    fi
-
-    dockerRunningPrereqFailed=0
-    docker ps &> /dev/null || dockerRunningPrereqFailed=1
-    if [ ${dockerRunningPrereqFailed} -eq 1 ]; then
-        echo "ERROR: Appsody requires the docker daemon to be running in order to build the project."
-        prereqFailed=1
-    else
-        echo "INFO: Docker daemon is running"
+        echo "INFO: kubectl CLI installed: $(kubectl version --short=true 2> /dev/null | tr -s '\n' ' ')"
     fi
 
     kubectlContextPrereqFailed=0
     kubectl_current_context=$(kubectl config current-context)
     if [ ! "${kubectl_current_context}" == "docker-desktop" ] &&
        [ ! "${kubectl_current_context}" == "docker-for-desktop" ]; then
-        echo "WARNING: kubectl CLI context is not set to \"docker-destop\""
-        echo "WARNING: This workshop has been tested with the Kubernetes cluster built into docker-destop."
-        echo "WARNING: Set kubectl to the \"docker-desktop\" context by running: \"kubectl config set-context docker-desktop\""
+        echo "ERROR: kubectl CLI context is not set to \"docker-destop\""
+        echo "ERROR: This workshop has been tested with the Kubernetes cluster built into docker-destop."
+        echo "ERROR: Set kubectl to the \"docker-desktop\" context by running: \"kubectl config set-context docker-desktop\""
+        prereqFailed=1
     else
         echo "INFO: kubectl context for workshop is correct: ${kubectl_current_context}"
     fi
 
+    local kubectlRunningClusterPrereqFailed=0
+    kubectl cluster-info &> /dev/null || kubectlRunningClusterPrereqFailed=1
+    if [ ${kubectlRunningClusterPrereqFailed} -eq 1 ]; then
+        echo "ERROR: kubernetes cluster information is not available. Please check whether the cluster is running with \"kubectl cluster-info\"."
+        prereqFailed=1
+    else
+        echo "INFO: kubernetes cluster is available."
+        kubectl cluster-info | grep -i running
+    fi
+
+    kubectl_client_version=$(kubectl version --short=true | grep Client | cut -d ' ' -f 3 | cut -d "." -f 1-2)
+    if [[ "${kubectl_client_version}" <  "v1.15" ]]; then
+        echo "ERROR: kubectl client version [$(kubectl version --short=true | grep Client | cut -d ' ' -f 3)] does not support Appsody. Minimum is 1.15"
+        prereqFailed=1
+    else
+        echo "INFO: kubectl client version [$(kubectl version --short=true | grep Client | cut -d ' ' -f 3)] meets minimum requirements."
+    fi
+
     if [ ${prereqFailed} -eq 0 ]; then
         echo "INFO: All prerequisites verified."
+    else
+        echo "ERROR: Workshop prerequisites are not met, please review earlier messages."
     fi
 
     return ${prereqFailed}
