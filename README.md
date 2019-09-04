@@ -15,18 +15,18 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Enable Kubernetes](#enable-kubernetes)
     - [Visual Studio Code Kabanero Setup](#visual-studio-code-kabanero-setup)
       - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
-    - [Installing the Appsody Extension for Codewind](#installing-the-appsody-extension-for-codewind)
-    - [CLI Kabanero Setup](#cli-kabanero-setup)
-      - [Installing the Appsody CLI](#installing-the-appsody-cli)
+    - [Installing the Appsody CLI](#installing-the-appsody-cli)
       - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
-    - [Priming the Maven and Docker caches - Denilson to update](#priming-the-maven-and-docker-caches---denilson-to-update)
+    - [Priming the Maven and Docker caches](#priming-the-maven-and-docker-caches)
   - [Developing Cloud-native applications - Appsody](#developing-cloud-native-applications---appsody)
     - [Getting to know Appsody](#getting-to-know-appsody)
     - [Creating a new Project with Appsody](#creating-a-new-project-with-appsody)
     - [Live coding with Appsody](#live-coding-with-appsody)
     - [Deploying to Kubernetes](#deploying-to-kubernetes)
   - [Developing Cloud-native applications - Codewind](#developing-cloud-native-applications---codewind)
-    - [Create an Appsody Project via the CLI](#create-an-appsody-project-via-the-cli)
+    - [Using a Custom Appsody Stack from Codewind](#using-a-custom-appsody-stack-from-codewind)
+    - [Creating a new Codewind Project](#creating-a-new-codewind-project)
+    - [Create an Appsody Project via Codewind](#create-an-appsody-project-via-codewind)
     - [Writing the Code](#writing-the-code)
     - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
   - [Working with Appsody Collections](#working-with-appsody-collections)
@@ -64,15 +64,7 @@ To install the **Codewind Extension** for **Visual Studio Code**, you have two o
 
 2. Manually launch Visual Studio Code, navigate to the **Extensions** view, search for **Codewind**, and install the extension from here.
 
-### Installing the Appsody Extension for Codewind
-
-Codewind comes with a set of pre-defined `templates` for various project types, but the Kabanero recommendation is to use those provided by Appsody.  To do this requires an Appsody extension to Codewind.
-
-To install **Appsody** for **Codewind**, follow the instructions from the **Appsody Codewind Extension** [repository](https://github.com/kabanero-io/appsodyExtension#installing-the-appsody-extension-on-codewind)
-
-### CLI Kabanero Setup
-
-#### Installing the Appsody CLI
+### Installing the Appsody CLI
 Depending on your operating system, the installation process for the **Appsody CLI** will differ. To correctly install **Appsody** for your operating system, view the following [link](https://appsody.dev/docs/getting-started/installation).
 
 Verify that the CLI tool is installed correctly by executing the following into your terminal:
@@ -82,7 +74,7 @@ $ appsody
 ```
 
 
- **TODO:** *The following section is no longer required but we do need to teach Codewind about the custom stack*
+ **TODO:** *The following section may no longer required but we do need to teach Codewind about the custom stack*
 
 #### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
@@ -97,14 +89,8 @@ This step will bring in large images into your local docker images repository. T
 curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/appsody-prime-caches.sh | bash
 ```
 
-This step will download most of the Java dependencies into your local disk. The cached dependencies will also save you time and bandwidth at the beginning of the workshop.
+*TODO*: Denilson - Add instructions to clone the Stack and build it ready for later.
 
-```
-cd ${tmp_dir}/stacks/experimental/java-microprofile-dev-mode
-mkdir -p ~/.m2
-// TODO use appsody run and ctrl-C
-docker run --rm -it -v ~/.m2:/root/.m2 -v "$PWD/image/project:/project" maven mvn -f /project/pom.xml dependency:resolve
-```
 
 
 ## Developing Cloud-native applications - Appsody
@@ -113,7 +99,7 @@ docker run --rm -it -v ~/.m2:/root/.m2 -v "$PWD/image/project:/project" maven mv
 
 We're going to start by trying out the developer experience Appsody provides and then we'll move on to use Eclipse Codewind.
 
-Let's take a look at what Appsody provides in terms of capabilities.  In a comamnd prompt, type:
+Let's take a look at what Appsody provides in terms of capabilities.  In a command prompt, type:
 
 ```
 appsody
@@ -431,12 +417,233 @@ When you're done, type `Ctrl-C` to end the appsody run.
 
 ### Deploying to Kubernetes
 
-You'
+You've finished writing your code and want to deploy to Kubernetes.  The Kabanero project integrates Tekton as a CI/CD pipeline for deploying to Kubernetes (including Knative and Istio).  This enables you to commit your changes to a git repo and have a Tekton pipeline build and potentially deploy the project.
+
+A full Kabanero set-up was considered too much for this workshop, so here we're going to make use of a nice little feature from Appsody, `appsody deploy`.  In the terminal in the root of your project, type:
+
+```
+appsody deploy
+```
+
+At the end of the deploy, you should see an output like this:
+
+```
+Built docker image kabanero-workshop
+Using applicationImage of: kabanero-workshop
+Attempting to apply resource in Kubernetes ...
+Running command: kubectl[apply -f temp-app-deploy.yaml --namespace default]
+Deployment succeeded.
+Running command: kubectl[get rt kabanero-workshop -o jsonpath="{.status.url}" --namespace default]
+Attempting to get resource from Kubernetes ...
+Running command: kubectl[get route kabanero-workshop -o jsonpath={.status.ingress[0].host} --namespace default]
+Attempting to get resource from Kubernetes ...
+Running command: kubectl[get svc kabanero-workshop -o jsonpath=http://{.status.loadBalancer.ingress[0].hostname}:{.spec.ports[0].nodePort} --namespace default]
+Deployed project running at http://localhost:30059
+```
+
+The very last line tells you where the application is available.  Let's call the resource by opening this endpoint in the browser:
+
+http://localhost:30059/starter/resource
+
+You should now see the response from your JAX-RS resource.
+
+Let's take a look at the deployment.  Enter:
+
+```
+kubectl get all
+```
+
+You should see an output similar to this:
+
+```
+charters@grahams-mbp-2 kabanero-workshop $ kubectl get all
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/appsody-operator-5bbbc784b7-rwrf4   1/1     Running   1          6d4h
+pod/kabanero-workshop-cc674d6df-npr7c   1/1     Running   0          106m
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/appsody-operator    ClusterIP   10.106.28.94    <none>        8383/TCP         6d4h
+service/kabanero-workshop   NodePort    10.111.44.163   <none>        9080:30059/TCP   106m
+service/kubernetes          ClusterIP   10.96.0.1       <none>        443/TCP          6d5h
+
+NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/appsody-operator    1/1     1            1           6d4h
+deployment.apps/kabanero-workshop   1/1     1            1           106m
+
+NAME                                          DESIRED   CURRENT   READY   AGE
+replicaset.apps/appsody-operator-5bbbc784b7   1         1         1       6d4h
+replicaset.apps/kabanero-workshop-cc674d6df   1         1         1       106m
+```
+
+The entries with `kabanero-workshop` are your applications.  The `appsody-operator` are those used by Appsody to perform the deployment.
+
+It's worth noting at this point that this deployment was achieved without us having to write, or understand, a Dockerfile or Kubernetes deployment yaml.  
+
+Now list the files in your project directory.  You should see something like this:
+
+```
+-rw-r--r--   1 charters  staff   614  3 Sep 15:02 app-deploy.yaml
+-rwxr-xr-x   1 charters  staff  7289  3 Sep 11:18 pom.xml
+drwxr-xr-x   4 charters  staff   128  2 Sep 18:05 src
+drwxr-xr-x  16 charters  staff   512  2 Sep 18:06 target
+```
+
+The `app-deploy.yaml` is generated from the stack and used to deploy to Kubernetes.  If you look inside the file, you'll see entries for `liveness` and `readiness` probes, metrics, and the service port.
+
+Check out the `liveness` and `readiness` endpoints by pointing your browser at:
+
+http://localhost:30059/health/live
+http://localhost:30059/health/ready
+
+You should see something like:
+
+```json
+// 20190903170443
+// http://localhost:30059/health/ready
+
+{
+  "checks": [
+    {
+      "data": {
+        
+      },
+      "name": "StarterReadinessCheck",
+      "status": "UP"
+    }
+  ],
+  "status": "UP"
+}
+```
+
+These endpoints are provided by the MicroProfile health checks generated by the project starter.
+
+Finally, let's undeploy the application by entering: 
+
+```
+appsody deploy delete
+```
+
+You should see an output something like this:
+
+```
+charters@grahams-mbp-2 kabanero-workshop $ appsody deploy delete
+Deleting deployment using deployment manifest app-deploy.yaml
+Attempting to delete resource from Kubernetes...
+Running command: kubectl[delete -f app-deploy.yaml --namespace default]
+Deployment deleted
+```
+
+Check that everything was undeployed using:
 
 
+```
+kubectl get all
+```
 
+You should see output similar to this:
+
+```
+charters@grahams-mbp-2 kabanero-workshop $ kubectl get all --namespace default
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/appsody-operator-5bbbc784b7-rwrf4   1/1     Running   1          6d21h
+
+NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/appsody-operator   ClusterIP   10.106.28.94   <none>        8383/TCP   6d21h
+service/kubernetes         ClusterIP   10.96.0.1      <none>        443/TCP    6d22h
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/appsody-operator   1/1     1            1           6d21h
+
+NAME                                          DESIRED   CURRENT   READY   AGE
+replicaset.apps/appsody-operator-5bbbc784b7   1         1         1       6d21h
+```
+
+What if I you decide you want to see the Container and Kubernetes that Appsody is using, or you want to take your project elsewhere?  You can do this as follows. Enter:
+
+```
+appsody extract
+```
+
+You should see output similar to:
+
+```
+charters@Grahams-MBP-2 kabanero-workshop $ appsody extract
+Extracting project from development environment
+Running command: docker[pull gcharters/java-microprofile-dev-mode:0.2]
+[Warning] Docker image pull failed: exit status 1
+Using local cache for image gcharters/java-microprofile-dev-mode:0.2
+[Warning] The stack image does not contain APPSODY_PROJECT_DIR. Using /project
+Running command: docker[create --name kabanero-workshop-extract -v /Users/charters/.m2/repository:/root/.m2/repository -v /Users/charters/kabanero-workshop/.:/project/user-app gcharters/java-microprofile-dev-mode:0.2]
+Running command: docker[cp kabanero-workshop-extract:/project /Users/charters/.appsody/extract/kabanero-workshop]
+Running command: docker[rm kabanero-workshop-extract -f]
+Project extracted to /Users/charters/.appsody/extract/kabanero-workshop
+```
+
+Let's take a look at the output:
+
+```
+cd ~/.appsody/extract/kabanero-workshop
+ls -al
+```
+
+You should see the following:
+
+```
+charters@Grahams-MBP-2 kabanero-workshop $ ls -al
+total 56
+drwxr-xr-x  11 charters  staff   352 30 Aug 16:15 .
+drwxr-xr-x   6 charters  staff   192  4 Sep 10:03 ..
+-rwxr-xr-x   1 charters  staff    32 20 Aug 13:46 .appsody-init.bat
+-rwxr-xr-x   1 charters  staff    44 20 Aug 13:46 .appsody-init.sh
+-rw-r--r--   1 charters  staff    42 20 Aug 13:46 .dockerignore
+-rw-r--r--   1 charters  staff   380 22 Aug 12:06 .project
+drwxr-xr-x   4 charters  staff   128 22 Aug 12:07 .settings
+-rw-r--r--   1 charters  staff   813 30 Aug 16:14 Dockerfile
+-rw-r--r--   1 charters  staff  3678 30 Aug 14:13 pom.xml
+drwxr-xr-x  11 charters  staff   352  3 Sep 15:08 user-app
+-rwxr-xr-x   1 charters  staff  2568 30 Aug 12:57 validate.sh
+```
+
+These are the files for the project, including those provided by the stack.  For example, the `pom.xml` is the parent pom for your application, and the `Dockerfile` is the one used to build and package the application.  The `user-app` is the maven project for your application.
+
+That's it for the Appsody part of the workshop.  You've seen how Appsody stacks and templates make it easy to get started with a new project with a curated and consistent dev and production environment. You've also seen how Appsody makes it really easy to build production-ready containers and deploy them to a Kubernetes environment.  Let's now take a look at Codewind.
 
 ## Developing Cloud-native applications - Codewind
+
+### Using a Custom Appsody Stack from Codewind
+
+We first need to teach Codewind about our Custom Appsody stack.  This is currently a manual task but in the not to distant future we expect Codewind to include UI to do this.
+
+Follow these instructions - https://www.eclipse.org/codewind/mdt-vsc-usingadifferenttemplate.html
+
+The file we want to add was created as part of the initial setup. Go to the location of your build of the custom stack:
+
+**TODO**: Where is this?
+```
+cd ???
+```
+
+Find the location of the file required by Codewind:
+
+```
+$PWD/ci/assets/experimental-index.json
+```
+
+E.g. `/Users/charters/kabanero-workshop/stacks/ci/assets/experimental-index.json
+
+
+### Creating a new Codewind Project
+...
+
+
+We've seen how the Appsody CLI helps create, build and deploy projects based on stacks and templates.  Let's now see how Codewind augments the Appsody experience with tools for cloud-native development.
+
+In VS Code, make sure Codewind is running:
+
+<img src="images/codewind-running.png" width="40%" height="40%">
+
+
+
 
 We're going to start by creating a new MicroProfile project. These first steps are the same for all the supported project types. 
 
@@ -489,7 +696,10 @@ Your endpoint is working!
 Congratulations! You have learnt how to develop an  application with **Codewind** and **Appsody**, without worrying about the containerisation and packaging of the application. If you already have **Appsody** installed via the **CLI**, we recommend that you [share the Appsody configuration between the CLI and Visual Studio Code](#), to keep all your **Appsody** projects together.
 
 
-### Create an Appsody Project via the CLI
+### Create an Appsody Project via Codewind
+
+
+
 Now that the CLI tool is correctly installed, we can now begin to create **Appsody** projects via the command line. To view the list of supported project stacks, enter the following command into your terminal:
 ```
 $ appsody list
