@@ -36,25 +36,34 @@ function gitCloneStack {
 #
 #
 function createOpenJdkLocal {
-    gitCloneStack
+    echo
+    echo "INFO: Creating base docker image: openjdk8-openj9-local"
+    echo "INFO: The image caches dependencies to preserve network bandwidth during the workshop."
+    echo
 
-    opendjk_local_docker_context_dir="${stacks_dir}/tmp"
-    mkdir -p "${opendjk_local_docker_context_dir}"
-    cp "${stacks_dir}/experimental/java-microprofile-dev-mode/image/project/pom.xml" "${opendjk_local_docker_context_dir}"
+    app_temp_dir="${app_dir}-temp"
+    rm -rf ${app_temp_dir}
+    mkdir -p ${app_temp_dir}
+    cd ${app_temp_dir}
+    appsody init java-microprofile
+    opendjk_local_docker_context_dir="${app_temp_dir}/tmp"
+    appsody extract --target-dir "${opendjk_local_docker_context_dir}"
+
     opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
     cat > "${opendjk_local_dockerfile}" <<EOF
 FROM adoptopenjdk/openjdk8-openj9
 
 COPY pom.xml /project/ 
+COPY user-app/pom.xml /project/user-app/
 
 RUN apt-get update && \
     apt-get install -y maven unzip && \
     sed -i "s|19.0.0.8|19.0.0.7|g" /project/pom.xml && \
-    mvn -B -f /project/pom.xml install dependency:copy-dependencies && \
-    mvn -B -f /project/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
+    mvn -q -B -f /project/user-app/pom.xml checkstyle:checkstyle install dependency:copy-dependencies && \
+    mvn -q -B -f /project/user-app/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
     sed -i "s|19.0.0.7|19.0.0.8|g" /project/pom.xml && \
-    mvn -B -f /project/pom.xml install dependency:copy-dependencies && \
-    mvn -B -f /project/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
+    mvn -q -B -f /project/user-app/pom.xml install dependency:copy-dependencies && \
+    mvn -q -B -f /project/user-app/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
     rm -rf /project
 EOF
 
@@ -62,7 +71,7 @@ EOF
     docker image ls openjdk8-openj9-local
     local result=$?
 
-    rm -rf "${opendjk_local_docker_context_dir}"
+    rm -rf "${app_temp_dir}"
 
     return ${result}
 }
@@ -242,7 +251,8 @@ chmod u+x "${env_file}"
 
 echo
 echo "INFO: Workshop preparation ready at ${workshop_dir}"
-echo "INFO: Execute the following line to configure environment variables:"
+echo
+echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
 echo "eval \$(cat ${workshop_dir}/env.sh)"
 echo
 
