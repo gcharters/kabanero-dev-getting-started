@@ -14,6 +14,68 @@ app_name=java-example
 workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
 # workshop_dir=`mktemp /tmp/wk.XXXXXX` || exit 1
 app_dir=${workshop_dir}/${app_name}
+stacks_dir=${workshop_dir}/stacks
+
+
+#
+# Ensures the Appsody stacks repo is cloned and up-to-date
+#
+function gitCloneStack {
+    if [ ! -e "${stacks_dir}" ]; then
+        mkdir -p ${workshop_dir}
+        cd "${workshop_dir}"
+        git clone https://github.com/gcharters/stacks.git
+    else
+        cd "${stacks_dir}"
+        git pull
+    fi
+}
+
+
+#
+#
+#
+function createOpenJdkLocal {
+    echo
+    echo "INFO: Creating base docker image: openjdk8-openj9-local"
+    echo "INFO: The image caches dependencies to preserve network bandwidth during the workshop."
+    echo
+
+    app_temp_dir="${app_dir}-temp"
+    rm -rf ${app_temp_dir}
+    mkdir -p ${app_temp_dir}
+    cd ${app_temp_dir}
+    appsody init java-microprofile
+    opendjk_local_docker_context_dir="${app_temp_dir}/tmp"
+    appsody extract --target-dir "${opendjk_local_docker_context_dir}"
+
+    opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
+    cat > "${opendjk_local_dockerfile}" <<EOF
+FROM adoptopenjdk/openjdk8-openj9
+
+COPY pom.xml /project/ 
+COPY user-app/pom.xml /project/user-app/
+
+RUN apt-get update && \
+    apt-get install -y maven unzip && \
+    sed -i "s|19.0.0.8|19.0.0.7|g" /project/pom.xml && \
+    mvn -q -B -f /project/user-app/pom.xml checkstyle:checkstyle install dependency:copy-dependencies && \
+    mvn -q -B -f /project/user-app/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
+    sed -i "s|19.0.0.7|19.0.0.8|g" /project/pom.xml && \
+    mvn -q -B -f /project/user-app/pom.xml install dependency:copy-dependencies && \
+    mvn -q -B -f /project/user-app/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
+    rm -rf /project
+EOF
+
+    docker build "${opendjk_local_docker_context_dir}" --tag openjdk8-openj9-local && \
+    docker image ls openjdk8-openj9-local
+    local result=$?
+
+    rm -rf "${app_temp_dir}"
+
+    return ${result}
+}
+
 
 #
 # Executes the first workshop steps once to trigger caching of docker images and other 
@@ -21,17 +83,10 @@ app_dir=${workshop_dir}/${app_name}
 #
 function cacheStacks {
     echo
-    echo "INFO: Workshop preparation starting..."
-    echo
-
-    mkdir -p ${workshop_dir}
-    cd ${workshop_dir}
-    stacks_dir=${workshop_dir}/stacks
-    git clone https://github.com/gcharters/stacks.git
-
-    echo
     echo "INFO: Caching docker images"
     echo
+    gitCloneStack
+
     mkdir -p ~/.m2
     cd ${stacks_dir}
     ./ci/build.sh . experimental/java-microprofile-dev-mode
@@ -168,26 +223,37 @@ function checksPrereqs {
 }
 
 
-# 
-# Prime cache for stacks
-#
-if [ ! -e "${workshop_dir}" ]; then
-    cacheStacks
-    result=$?
-fi
+echo
+echo "INFO: Workshop preparation starting..."
+echo
 
 checksPrereqs
 result=$?
+
+if [ ${result} -eq 0 ]; then
+    echo
+    createOpenJdkLocal
+    result=$?
+fi
 
 
 #
 # Environment settings
 #
-export CODEWIND_INDEX=true
+env_file="${workshop_dir}/env.sh"
+cat > "${env_file}" << EOF
+export CODEWIND_INDEX=false
+export WORKSHOP_DIR=${workshop_dir}
+export workshop_dir=${workshop_dir}
+EOF
+chmod u+x "${env_file}"
 
 
 echo
 echo "INFO: Workshop preparation ready at ${workshop_dir}"
+echo
+echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
+echo "eval \$(cat ${workshop_dir}/env.sh)"
 echo
 
 exit ${result}
