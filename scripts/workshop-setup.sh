@@ -35,7 +35,7 @@ function gitCloneStack {
 #
 #
 #
-function createOpenJdkLocal {
+function cacheDockerImages {
     echo
     echo "INFO: Creating base docker image: openjdk8-openj9-local"
     echo "INFO: The image caches dependencies to preserve network bandwidth during the workshop."
@@ -72,6 +72,11 @@ EOF
     local result=$?
 
     rm -rf "${app_temp_dir}"
+
+    echo
+    echo "INFO: Caching additional docker images to be used in examples."
+    echo
+    docker pull postgres
 
     return ${result}
 }
@@ -232,7 +237,7 @@ result=$?
 
 if [ ${result} -eq 0 ]; then
     echo
-    createOpenJdkLocal
+    cacheDockerImages
     result=$?
 fi
 
