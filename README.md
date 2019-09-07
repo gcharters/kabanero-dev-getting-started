@@ -2,9 +2,9 @@
 
 Kabanero is an open source project focused on bringing together key foundational open source technologies into a framework for developing and deploying modern cloud-native applications.  The Kabanero developer experience leverages the Appsody and Eclipse Codewind open source projects enabling developers to use project 'templates' to rapidly create new cloud-native applications, develop and build them in a curated container 'stack' environment and deploy them to Knative/Kubernetes all without the need for container or Kubernetes skills.
 
-This tutorial will give you an introduction to the Kabanerio developer experience. You'll create and deploy a Java MicroProfile based cloud-native application, however, Kabanero provides a number of stacks, including Node.js and Spring Boot and is extensible so others can easily be added. For more information, see [Appsody.dev](https://appsody.dev/).
+This tutorial will give you an introduction to the Kabanero developer experience. You'll create and deploy a Java MicroProfile based cloud-native application, however, Kabanero provides a number of stacks, including Node.js and Spring Boot and is extensible so others can easily be added. For more information, see [Appsody.dev](https://appsody.dev/).
 
-At the end of this tutorial, you should have a good understanding of the Kabanerio developer experience through the use of Appsody and Eclipse Codewind.  You'll know how to create a new application, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of writing the code.
+At the end of this tutorial, you should have a good understanding of the Kabanero developer experience through the use of Appsody and Eclipse Codewind.  You'll know how to create a new application, develop and deploy it to Knative and have an appreciation for how Kabanero does all the heavy-lifting helping you focus on the task of writing the code.
 
 
 ## Table of Contents
@@ -17,7 +17,7 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
       - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
     - [Installing the Appsody CLI](#installing-the-appsody-cli)
       - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
-    - [Priming the Maven and Docker caches](#priming-the-maven-and-docker-caches)
+    - [Pre-requisite checks and caching of large images](#pre-requisite-checks-and-caching-of-large-images)
   - [Developing Cloud-native applications - Appsody](#developing-cloud-native-applications---appsody)
     - [Getting to know Appsody](#getting-to-know-appsody)
     - [Creating a new Project with Appsody](#creating-a-new-project-with-appsody)
@@ -81,16 +81,17 @@ While this is optional, it is recommended. Rather than having **Appsody CLI** pr
 
 To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
 
-### Priming the Maven and Docker caches
+### Pre-requisite checks and caching of large images
 
-This step will bring in large images into your local docker images repository. The cached images will save you time and bandwidth at the beginning of the workshop.
+This step will ensure your environment has all the prerequisites installed and running.
+
+In addition to checking prerequisites, this step will also cache large images into your local system. The cached content will save you valuable time at the beginning of the workshop.
 
 ```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/appsody-prime-caches.sh | bash
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/workshop-setup.sh | bash
 ```
 
 *TODO*: Denilson - Add instructions to clone the Stack and build it ready for later.
-
 
 
 ## Developing Cloud-native applications - Appsody
@@ -187,7 +188,8 @@ We're going to use a custom stack created for this workshop.  Anybody can write 
 As part of the setup for the workshop, you cloned a github repository and built a project that contained the new stack. Let's go to the output of that build:
 
 ```
-cd ${tmp_dir}/stacks/ci/assets
+workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
+cd ${workshop_dir}/stacks/ci/assets
 ```
 
 If you list the contents of that directory, you should see something like this:
@@ -221,7 +223,7 @@ This contains the stack packages (.tar.gz files) and local/remote repository fil
 Let's add the local repository definition to the set of repositories that the Appsody CLI can use:
 
 ```
-appsody repo add workshop file://$(PWD)/experimental-index-local.yaml
+appsody repo add workshop file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Check the repository has been added:
@@ -237,7 +239,7 @@ charters@Grahams-MBP-2 assets (master) $ appsody repo list
 
 NAME       	URL                                                                                      
 *appsodyhub	https://raw.githubusercontent.com/appsody/stacks/master/index.yaml                       
-workshop   	file:///Users/charters/Repositories/github/stacks/ci/assets/experimental-index-local.yaml
+workshop   	file:///Users/charters/workspace/kabanero-workshop/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Let's see what stacks we now have available:
@@ -268,8 +270,8 @@ We're now ready to start creating applications using the new Appsody stack.
 Make a directory to contain your project:
 
 ```
-mkdir ~/kabanero-workshop
-cd ~/kabanero-workshop
+mkdir -p ~/workspace/kabanero-workshop/java-example
+cd ~/workspace/kabanero-workshop/java-example
 ```
 
 Create the new project.  This project will using the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
@@ -837,21 +839,196 @@ Copy the deployment's URL into a browser. Congratulations! Your application is n
 
 ## Working with Appsody Collections
 
-Introduce the Collection concept.  Talk about Stacks and Templates (these will have been talked about at a high level, but the details of the files will not have been covered.
+_Introduce the Collection concept.  Talk about Stacks and Templates (these will have been talked about at a high level, but the details of the files will not have been covered._
+
+A collection includes everything you need to create a microservice in a single container image, along with an enterprise-grade deployment & integrated continuous delivery choice. Collections are developed by application architects to match their organizational and product requirements and work as the basis for applications created by application developers.
+
+A collection is defined by a combination of a stack (container images and application templates), build/CD conventions, and deployment best-practices. 
+
+The workshop will cover various aspects of the customization of an existing collection, which will better prepare you for eventually creating an entirely new collection after the workshop. The entire process for creating a new collection is described in the ["Creating a Stack"](https://appsody.dev/docs/stacks/create) section of the Appsody website.
+
+
+### Stacks ###
+
+A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may  to specify different tunning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
+
+You can study the internal file structure of a stack in more detail [here](https://appsody.dev/docs/stacks/stack-structure).
+
+#### Collection Scenario 1: Custom application templates #### 
+
+A stack contains at least one application template, which is the set of application files placed in the application directory during the initial creation of a project. Templates named "default" are used by `appsody init` when the user does not specify a template name. An application architect can create new templates to reflect different code-base starting points for application developers, such as a default template for a simple stateless application or a more complex template with starter code for connecting to a remote database.
+
+_TODO: Denilson, write example_
+
+
+#### Collection Scenario 2: Update the release of Open Liberty in the stack ####
+
+The first part of the workshop used the custom "experimental/java-microprofile-dev-mode" stack. In this scenario, a new version of Open Liberty is released and you, as the application architect, want all applications based on this stack to be migrated to the latest release in the next development and deployment cycle.
+
+The first step is to clone the stack, which was already executed by the prerequisite preparation steps:
+
+```
+workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
+
+[ ! -e "${workshop_dir}/stacks" ] && \
+( mkdir -p "${workshop_dir}"
+  cd "${workshop_dir}"
+  git clone https://github.com/gcharters/stacks )
+
+```
+In this stack, the [container image file](https://github.com/gcharters/stacks/blob/master/experimental/java-microprofile-dev-mode/image/project/Dockerfile) specifies the usage of Maven as the build tool, and we can see the version of Open Liberty in the "properties" section of the master [pom.xml file](https://github.com/gcharters/stacks/blob/master/experimental/java-microprofile-dev-mode/image/project/pom.xml) in that same directory:
+
+```pom.xml
+<version.openliberty-runtime>19.0.0.7</version.openliberty-runtime>
+```
+
+You can now modify the version to 19.0.0.8:
+```
+sed -i "" "s|19.0.0.7|19.0.0.8|g" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
+# confirm the change
+grep "19.0.0" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
+```
+
+Now we can build the stack to ensure it is still valid:
+
+```
+cd "${workshop_dir}/stacks"
+./ci/build.sh . experimental/java-microprofile-dev-mode
+```
+
+In order to validate the new stack, we want to register the local build as a local file-based repository, so we can iterate over the changes without publishing them:
+
+```
+[[ $(appsody list | grep workshop-local) ]] && appsody repo remove workshop-local
+appsody repo add workshop-local file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
+```
+
+Verify the successful addition of the local repository:
+```
+appsody list | grep workshop-local
+
+workshop-local	java-microprofile-dev-mode	0.2.10   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+```
+
+With the local stack build registered as an Appsody repository, it is time to verify the changes: 
+```
+[ -e "${workshop_dir}/stacktest" ] && rm -rf "${workshop_dir}/stacktest"
+mkdir -p "${workshop_dir}/stacktest"
+cd "${workshop_dir}/stacktest"
+appsody init workshop-local/java-microprofile-dev-mode
+appsody run
+```
+
+You should see output lines indicating the newer version of Open Liberty, as well as the newer version of the collection:
+
+```
+...
+
+[Container] [INFO] --- liberty-maven-plugin:3.0.M1:install-server (create-server) @ starter-app ---
+[Container] [INFO] CWWKM2102I: Using artifact based assembly archive : io.openliberty:openliberty-runtime:null:19.0.0.8:zip
+...
+```
+
+### Build/CD ###
+
+A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysys, and many others.
+
+These instructions are executed directly when the developer directly invokes `appsody build` or `appsody deploy` when Appsody detects code changes since the last build.
+
+#### Collection Scenario 3: Add static code verification to build process ####
+
+ In this scenario, the entire team discussed ways of making code reviews more efficient, and agreed on ensuring minimal coding guidelines for all applications based on that stack. 
+
+After considering multiple tools, the team agreed on using [Checkstyle](https://maven.apache.org/plugins/maven-checkstyle-plugin/usage.html) , and the application architect can make that modification to the stack image itself. 
+
+For simplicity we will use the default checkstyle rules, so that we just need to add the ` checkstyle:check` goal to the `mvn` invocation in the application Dockerfile, located under:
+
+```
+${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/Dockerfile
+```
+
+Change the following line from:
+```
+RUN mvn install -DskipTests
+```
+
+to
+
+```
+RUN mvn checkstyle:checkstyle install -DskipTests -Dcheckstyle.consoleOutput=true
+```
+
+With the change in place, we can rebuild the stack again:
+
+```
+cd "${workshop_dir}/stacks"
+./ci/build.sh . experimental/java-microprofile-dev-mode
+```
+
+And we can verify that the new code verification step is executed when an application developer executes `appsody build`:
+
+```
+cd "${workshop_dir}/stacktest"
+appsody build
+
+...
+
+>>> [Docker] Step 8/13 : RUN mvn checkstyle:check install -DskipTests
+[Docker]  ---> Running in 22765b6b6301
+...
+[Docker] [INFO] Starting audit...
+[Docker] [ERROR] /project/user-app/src/main/java/dev/appsody/starter/health/StarterReadinessCheck.java:1: Missing package-info.java file. [JavadocPackage]
+...
+[Docker] [ERROR] /project/user-app/src/main/java/dev/appsody/starter/StarterApplication.java:6: Missing a Javadoc comment. [JavadocType]
+[Docker] Audit done.
+[Docker] [INFO] There are 17 errors reported by Checkstyle 8.19 with sun_checks.xml ruleset.
+...
+```
+
+Notice how this first modification does not fail the build process, which is done by design, as the application architect may want to give some time for the whole team to address the errors or consider modifying some of the rules based on developer's feedback.
+
+
+### Deployment ###
+
+A collection may also specify the deployment options for the application once `appsody deploy` is invoked. Actual deployment to a production environment is likely governed by a more formal CI/CD pipeline, but `appsody deploy` is a good validation step for an application developer running a private cluster, like the built-in Kubernetes cluster in Docker Desktop.
+
+We also want to update the stack version:
+
+```
+cd "${workshop_dir}/stacks"
+find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.2.10" {} \; -print | grep experimental
+./experimental/java-microprofile-dev-mode/stack.yaml
+./experimental/java-microprofile-dev-mode/image/project/pom.xml
+./experimental/java-microprofile-dev-mode/templates/default/pom.xml
+
+# Replace all occurrences of 0.2.10 with 0.2.11
+ find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2.10" {} \; -print  | xargs -Irepl sed -i "" "s|0.2.10|0.2.11|g" repl
+
+# Ensure the old version was replaced across all affected files
+find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2." {} \; -print 
+./experimental/java-microprofile-dev-mode/stack.yaml
+./experimental/java-microprofile-dev-mode/image/project/pom.xml
+./experimental/java-microprofile-dev-mode/templates/default/pom.xml
+
+```
+
+With the stack version updated, we can build it one last time before making the final test:
+
+```
+cd "${workshop_dir}/stacks"
+./ci/build.sh . experimental/java-microprofile-dev-mode
+```
+
+And execute the final application deployment:
+
+```
+cd "${workshop_dir}/stacktest"
+appsody deploy
+```
+
+
+
+## Talk about stack semantic versioning ##
+
+_TODO: Denilson to ask Graham about it_
  
-Update the Template code (would be nice to have a good scenario) - Java code and/or server configuration, etc.
-Generate new project
-See the code changes.  Maybe run the new application
- 
-Update the stack to latest Liberty (19.0.0.7 -> 19.0.0.8/9)
-Demonstrate validation in some way.  Maybe change in Jane's pom to a different version to see it fail.
- 
-See that the validation fails
-Update the validation
-Build, release
-Do appsody run on an existing project and see it take the latest stack.
-Talk about stack semantic versioning. 
- 
-Suggestion - change to the stack pom.xml to add a linter, for example, get the to modify the code to fail the build.
- 
-Create a new project
