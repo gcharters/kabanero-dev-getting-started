@@ -847,37 +847,17 @@ sed -i "" "s|19.0.0.7|19.0.0.8|g" "${workshop_dir}/stacks/experimental/java-micr
 grep "19.0.0" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
 ```
 
-With the version changed, we can build the stack and before proceeding with the stack validation steps:
+With the version changed, we need to rebuild the stack before proceeding with the stack validation steps:
 
 ```
 cd "${workshop_dir}/stacks"
 ./ci/build.sh . experimental/java-microprofile-dev-mode
 ```
 
-In order to validate the new stack, we want to first test it locally, so we will register the local build as a file-based repository:
+Since this local stack build was registered as an Appsody repository in the first part of the workshop, there is no need to register it again. It is now time to verify the changes from the perspective of the application developer. We can go back to the original application directory and trigger another run, which will use the updated stack:
 
 ```
-[[ $(appsody list | grep workshop-local) ]] && appsody repo remove workshop-local
-appsody repo add workshop-local file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
-```
-
-With the repository registered, we can now see it in the output of `appsody list`:
-```
-appsody list workshop-local
-
-REPO          	ID                        	VERSION  	TEMPLATES       	DESCRIPTION                                              
-workshop-local	java-microprofile-dev-mode	0.2.10   	*default, psqldb	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
-```
-
-With the local stack build registered as an Appsody repository, it is time to verify the changes from the perspective of an application developer. For that purpose, we will create a new application directory and initialize it with the local collection built for this scenario: 
-```
-# Ensure the target directory is empty
-[ -e "${workshop_dir}/stacktest" ] && rm -rf "${workshop_dir}/stacktest"
-
-mkdir -p "${workshop_dir}/stacktest"
-cd "${workshop_dir}/stacktest"
-
-appsody init workshop-local/java-microprofile-dev-mode
+cd "${workshop_dir}/java-example"
 
 appsody run
 ```
@@ -891,6 +871,9 @@ As the application starts, we can see output lines indicating the newer version 
 [Container] [INFO] CWWKM2102I: Using artifact based assembly archive : io.openliberty:openliberty-runtime:null:19.0.0.8:zip
 ...
 ```
+
+End the application with `Ctrl+C`.
+
 
 #### Collection Scenario 2: Custom application template #### 
 
@@ -915,16 +898,20 @@ docker network create workshop_nw
 docker run --rm -it --name workshop-postgres --hostname psqldb --network workshop_nw -e POSTGRES_PASSWORD=mysecretpassword -d postgres 
 ```
 
+Ensure the database container is running:
 
 ```
-cd "${workshop_dir}/stacktest"
+docker ps | grep workshop-postgres
 
-# Stop the application if still running
-appsody stop
+b66c53a3be0f        postgres                                                  "docker-entrypoint.s…"   22 seconds ago      Up 21 seconds       5432/tcp                    workshop-postgres
+```
+
+
+```
 
 mkdir -p "${workshop_dir}/stacktest-db"
 cd "${workshop_dir}/stacktest-db"
-appsody init workshop-local/java-microprofile-dev-mode psqldb
+appsody init workshop/java-microprofile-dev-mode psqldb
 
 appsody run --network workshop_nw
 ```
@@ -941,6 +928,13 @@ curl -s http://localhost:9080/starter/database/  | tr -s "," "\n"
 "db.driver.version":"42.2.6"
 "db.jdbc.major.version":4
 "db.jdbc.minor.version":2}
+```
+
+End the application with `Ctrl+C`, stop the workshop-postgres container, and delete the custom network:
+
+```
+docker stop workshop-postgres
+docker network rm workshop_nw
 ```
 
 
@@ -983,7 +977,7 @@ cd "${workshop_dir}/stacks"
 And we can verify that the new code verification step is executed when an application developer executes `appsody build`:
 
 ```
-cd "${workshop_dir}/stacktest"
+cd "${workshop_dir}/java-example"
 appsody build
 
 ...
@@ -1022,7 +1016,7 @@ appsody/java-microprofile-dev-mode   latest              ad81b68a6079        2 h
 `appsody init` will always configure the application to use the version with two digits, which is "0.2" in this case:
 
 ```
-cd "${workshop_dir}/stacktest
+cd "${workshop_dir}/java-example
 cat .appsody-config.yaml
 
 stack: appsody/java-microprofile-dev-mode:0.2
@@ -1033,24 +1027,20 @@ That means application developers will see their next call to `appsody run` to a
 For this scenario, we can modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1.
 
 
-We also want to update the stack version:
-
 ```
 cd "${workshop_dir}/stacks"
-find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.2.10" {} \; -print | grep experimental
-./experimental/java-microprofile-dev-mode/stack.yaml
-./experimental/java-microprofile-dev-mode/image/project/pom.xml
-./experimental/java-microprofile-dev-mode/templates/default/pom.xml
 
 # Replace all occurrences of 0.2.10 with 0.3.1
  find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2.10" {} \; -print  | xargs -Irepl sed -i "" "s|0.2.10|0.3.1|g" repl
 
 # Ensure the old version was replaced across all affected files
-find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.3" {} \; -print 
+find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.3" {} \; -print 
+version: 0.3.1
 ./experimental/java-microprofile-dev-mode/stack.yaml
+    <version>0.3.1</version>
 ./experimental/java-microprofile-dev-mode/image/project/pom.xml
+        <version>0.3.1</version>
 ./experimental/java-microprofile-dev-mode/templates/default/pom.xml
-
 ```
 
 We can now replace the `checkstyle:checkstyle` goal in the `mvn` invocation with `checkstyle:check`, which will fail the build in case of errors.
@@ -1063,7 +1053,7 @@ ${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/Doc
 
 Change the following line from:
 ```
-RUN mvn checkstyle:checkstyle install -DskipTests
+RUN mvn checkstyle:checkstyle install -DskipTests -Dcheckstyle.consoleOutput=true
 ```
 
 to
@@ -1098,14 +1088,15 @@ appsody/java-microprofile-dev-mode   0.2.10              ad81b68a6079        3 h
 With the new stack generated, the application architect will notify developers who are ready to make the switch to the new version about the stack availability, at which point the application developers can modify the appsody configuration in their application directory:
 
 ```
-> cd "${workshop_dir}/stacktest
+> cd "${workshop_dir}/java-example
 
 # Modify the version in ".appsody-config.yaml" from 0.2 to 0.3
-
+# After saving the modification, you should see the following output:
 > cat .appsody-config.yaml
 stack: appsody/java-microprofile-dev-mode:0.3
 
 # Modify the version in "pom.xml" from 0.2.10 to 0.3.1
+# After saving the modification, you should see the following output:
 
 > grep 0.3 pom.xml
         <version>0.3.1</version>

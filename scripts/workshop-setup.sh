@@ -40,6 +40,7 @@ function cacheDockerImages {
     echo "INFO: Creating base docker image: openjdk8-openj9-local"
     echo "INFO: The image caches dependencies to preserve network bandwidth during the workshop."
     echo
+    gitCloneStack
 
     app_temp_dir="${app_dir}-temp"
     rm -rf ${app_temp_dir}
@@ -48,22 +49,23 @@ function cacheDockerImages {
     appsody init java-microprofile
     opendjk_local_docker_context_dir="${app_temp_dir}/tmp"
     appsody extract --target-dir "${opendjk_local_docker_context_dir}"
+    cp "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
 
     opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
     cat > "${opendjk_local_dockerfile}" <<EOF
 FROM adoptopenjdk/openjdk8-openj9
 
 COPY pom.xml /project/ 
+COPY pom-dev.xml /project/ 
 COPY user-app/pom.xml /project/user-app/
 
 RUN apt-get update && \
     apt-get install -y maven unzip && \
     sed -i "s|19.0.0.8|19.0.0.7|g" /project/pom.xml && \
-    mvn -q -B -f /project/user-app/pom.xml checkstyle:checkstyle install dependency:copy-dependencies && \
-    mvn -q -B -f /project/user-app/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
+    mvn -q -B -f /project/user-app/pom.xml checkstyle:checkstyle install dependency:go-offline && \
+    mvn -q -B -f /project/pom-dev.xml checkstyle:checkstyle install dependency:go-offline && \
     sed -i "s|19.0.0.7|19.0.0.8|g" /project/pom.xml && \
-    mvn -q -B -f /project/user-app/pom.xml install dependency:copy-dependencies && \
-    mvn -q -B -f /project/user-app/pom.xml dependency:resolve-plugins -DexcludeTransitive=true && \
+    mvn -q -B -f /project/user-app/pom.xml dependency:go-offline && \
     rm -rf /project
 EOF
 
@@ -88,7 +90,7 @@ EOF
 #
 function cacheStacks {
     echo
-    echo "INFO: Caching docker images"
+    echo "INFO: Pre-building local stack clone"
     echo
     gitCloneStack
 
@@ -211,7 +213,7 @@ function checksPrereqs {
     fi
 
     kubectl_client_version=$(kubectl version --short=true | grep Client | cut -d ' ' -f 3 | cut -d "." -f 1-2)
-    if [[ "${kubectl_client_version}" <  "v1.15" ]]; then
+    if [[ "${kubectl_client_version}" <  "v1.14" ]]; then
         echo "ERROR: kubectl client version [$(kubectl version --short=true | grep Client | cut -d ' ' -f 3)] does not support Appsody. Minimum is 1.15"
         prereqFailed=1
     else
@@ -228,6 +230,13 @@ function checksPrereqs {
 }
 
 
+function cleanWorkshop() {
+    [[ $(appsody list | grep workshop) ]] && appsody repo remove workshop
+    docker rmi $(docker image ls appsody/* --format='{{.ID}}')
+    docker rmi postgresql
+    docker rmi openjdk8-openj9-local
+}
+
 echo
 echo "INFO: Workshop preparation starting..."
 echo
@@ -238,6 +247,13 @@ result=$?
 if [ ${result} -eq 0 ]; then
     echo
     cacheDockerImages
+    result=$?
+fi
+
+
+if [ ${result} -eq 0 ]; then
+    echo
+    cacheStacks
     result=$?
 fi
 
