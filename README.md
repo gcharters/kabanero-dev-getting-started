@@ -32,12 +32,11 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
   - [Working with Appsody Collections](#working-with-appsody-collections)
     - [Stacks](#stacks)
-      - [Collection Scenario 1: Custom application templates ####](#collection-scenario-1-custom-application-templates)
-      - [Collection Scenario 2: Update the release of Open Liberty in the stack](#collection-scenario-2-update-the-release-of-open-liberty-in-the-stack)
-    - [Build/CD](#buildcd)
-      - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
-    - [Deployment](#deployment)
-  - [Talk about stack semantic versioning](#talk-about-stack-semantic-versioning)
+      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#Collection-Scenario-1:-Update-the-release-of-Open-Liberty-in-the-stack)
+      - [Collection Scenario 2: Custom application templates](#Collection-Scenario-2:-Custom-application-templates)
+    - [Build/CD](#Build/CD)
+      - [Collection Scenario 3: Add static code verification to build process](#Collection-Scenario-3:-Add-static-code-verification-to-build-process)
+      - [Collection Scenario 4: Stack versioning](#Collection-Scenario-4:-Stack-versioning)
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
@@ -98,8 +97,6 @@ In addition to checking prerequisites, this step will also cache large images in
 ```
 curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/workshop-setup.sh | bash
 ```
-
-*TODO*: Denilson - Add instructions to clone the Stack and build it ready for later.
 
 
 ## Developing Cloud-native applications - Appsody
@@ -822,14 +819,8 @@ A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one
 
 You can study the internal file structure of a stack in more detail [here](https://appsody.dev/docs/stacks/stack-structure).
 
-#### Collection Scenario 1: Custom application templates #### 
 
-A stack contains at least one application template, which is the set of application files placed in the application directory during the initial creation of a project. Templates named "default" are used by `appsody init` when the user does not specify a template name. An application architect can create new templates to reflect different code-base starting points for application developers, such as a default template for a simple stateless application or a more complex template with starter code for connecting to a remote database.
-
-_TODO: Denilson, write example_
-
-
-#### Collection Scenario 2: Update the release of Open Liberty in the stack ####
+#### Collection Scenario 1: Update the release of Open Liberty in the stack ####
 
 The first part of the workshop used the custom "experimental/java-microprofile-dev-mode" stack. In this scenario, a new version of Open Liberty is released and you, as the application architect, want all applications based on this stack to be migrated to the latest release in the next development and deployment cycle.
 
@@ -844,50 +835,36 @@ workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
   git clone https://github.com/gcharters/stacks )
 
 ```
+
 In this stack, the [container image file](https://github.com/gcharters/stacks/blob/master/experimental/java-microprofile-dev-mode/image/project/Dockerfile) specifies the usage of Maven as the build tool, and we can see the version of Open Liberty in the "properties" section of the master [pom.xml file](https://github.com/gcharters/stacks/blob/master/experimental/java-microprofile-dev-mode/image/project/pom.xml) in that same directory:
 
 ```pom.xml
 <version.openliberty-runtime>19.0.0.7</version.openliberty-runtime>
 ```
 
-You can now modify the version to 19.0.0.8:
+You can now modify the Open Liberty version to 19.0.0.8:
 ```
 sed -i "" "s|19.0.0.7|19.0.0.8|g" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
 # confirm the change
 grep "19.0.0" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
 ```
 
-Now we can build the stack to ensure it is still valid:
+With the version changed, we need to rebuild the stack before proceeding with the stack validation steps:
 
 ```
 cd "${workshop_dir}/stacks"
 ./ci/build.sh . experimental/java-microprofile-dev-mode
 ```
 
-In order to validate the new stack, we want to register the local build as a local file-based repository, so we can iterate over the changes without publishing them:
+Since this local stack build was registered as an Appsody repository in the first part of the workshop, there is no need to register it again. It is now time to verify the changes from the perspective of the application developer. We can go back to the original application directory and trigger another run, which will use the updated stack:
 
 ```
-[[ $(appsody list | grep workshop-local) ]] && appsody repo remove workshop-local
-appsody repo add workshop-local file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
-```
+cd "${workshop_dir}/java-example"
 
-Verify the successful addition of the local repository:
-```
-appsody list | grep workshop-local
-
-workshop-local	java-microprofile-dev-mode	0.2.10   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
-```
-
-With the local stack build registered as an Appsody repository, it is time to verify the changes: 
-```
-[ -e "${workshop_dir}/stacktest" ] && rm -rf "${workshop_dir}/stacktest"
-mkdir -p "${workshop_dir}/stacktest"
-cd "${workshop_dir}/stacktest"
-appsody init workshop-local/java-microprofile-dev-mode
 appsody run
 ```
 
-You should see output lines indicating the newer version of Open Liberty, as well as the newer version of the collection:
+As the application starts, we can see output lines indicating the newer version of Open Liberty, which completes the scenario:
 
 ```
 ...
@@ -896,6 +873,72 @@ You should see output lines indicating the newer version of Open Liberty, as wel
 [Container] [INFO] CWWKM2102I: Using artifact based assembly archive : io.openliberty:openliberty-runtime:null:19.0.0.8:zip
 ...
 ```
+
+End the application with `Ctrl+C`.
+
+
+#### Collection Scenario 2: Custom application template #### 
+
+A stack contains at least one application template, which is the set of application files placed in the application directory during the initial creation of a project. Templates named "default" are used by `appsody init` when the user does not specify a template name. An application architect can create new templates to reflect different starting points for application developers, such as a default template for a simple stateless application or a more complex template with starter code for connecting to a remote database.
+
+In this scenario, we will inspect an alternative template with a postgresql database connection endpoint, then create and test an application starter using that template.
+
+We first need to take a look at the alternative template, which is located in the "templates" folder:
+
+<img src="images/stack-psqldb-template.png" width="60%" height="60%">
+
+DatabaseResource.java implements a "/database" JAX-RS path under the root context for the application, it relies on PaasProperties.java to read the connection parameters. Those parameters are hardcoded for this workshop, but a template meant for actual production environments should read that information from a secret mounted to the pod or container.
+
+You will also notice the addition of the postgresql JDBC driver to the pom.xml file in the template.
+
+Our second step is to instantiate a local PostgreSQL database. We will use a custom docker network for both the PostgreSQL database container and the application container, which makes it easier for the application container to locate the database container by hostname instead of IP address.
+
+```
+docker network create workshop_nw
+
+# Start postgresql
+docker run --rm -it --name workshop-postgres --hostname psqldb --network workshop_nw -e POSTGRES_PASSWORD=mysecretpassword -d postgres 
+```
+
+Ensure the database container is running:
+
+```
+docker ps | grep workshop-postgres
+
+b66c53a3be0f        postgres                                                  "docker-entrypoint.s…"   22 seconds ago      Up 21 seconds       5432/tcp                    workshop-postgres
+```
+
+
+```
+
+mkdir -p "${workshop_dir}/stacktest-db"
+cd "${workshop_dir}/stacktest-db"
+appsody init workshop/java-microprofile-dev-mode psqldb
+
+appsody run --network workshop_nw
+```
+
+Wait for the application to complete its startup cycle and verify that the new endpoint is available:
+
+```
+curl -s http://localhost:9080/starter/database/  | tr -s "," "\n"
+{"client.info.ApplicationName":"PostgreSQL JDBC Driver"
+"db.product.name":"PostgreSQL"
+"db.product.version":"11.5 (Debian 11.5-1.pgdg90+1)"
+"db.major.version":11
+"db.minor.version":5
+"db.driver.version":"42.2.6"
+"db.jdbc.major.version":4
+"db.jdbc.minor.version":2}
+```
+
+End the application with `Ctrl+C`, stop the workshop-postgres container, and delete the custom network:
+
+```
+docker stop workshop-postgres
+docker network rm workshop_nw
+```
+
 
 ### Build/CD ###
 
@@ -936,7 +979,7 @@ cd "${workshop_dir}/stacks"
 And we can verify that the new code verification step is executed when an application developer executes `appsody build`:
 
 ```
-cd "${workshop_dir}/stacktest"
+cd "${workshop_dir}/java-example"
 appsody build
 
 ...
@@ -953,50 +996,133 @@ appsody build
 ...
 ```
 
-Notice how this first modification does not fail the build process, which is done by design, as the application architect may want to give some time for the whole team to address the errors or consider modifying some of the rules based on developer's feedback.
+#### Collection Scenario 4: Stack versioning  #### 
 
+Notice how the checkstyle modification from the previous scenario does not fail the build process, but rather prints a summary of errors for the developer.
 
-### Deployment ###
+This was done by design, as the application architect may want to give some time for the whole team to address the errors without suddenly disrupting their workflow.
 
-A collection may also specify the deployment options for the application once `appsody deploy` is invoked. Actual deployment to a production environment is likely governed by a more formal CI/CD pipeline, but `appsody deploy` is a good validation step for an application developer running a private cluster, like the built-in Kubernetes cluster in Docker Desktop.
+In this scenario, we want to show how the application architect could release a new version of the stack that will not automatically get picked up by developers immediately after release, so we need to understand how Appsody tags stack images.
 
-We also want to update the stack version:
+The initial version of the stack used in this workshop is 0.2.10, which is listed in the output of `appsody list`. During compilation of the stack, you will notice how Appsody creates 4 docker images:
+
+```
+> docker images appsody/java-microprofile-dev-mode 
+REPOSITORY                           TAG                 IMAGE ID            CREATED             SIZE
+appsody/java-microprofile-dev-mode   0                   ad81b68a6079        2 hours ago         1.07GB
+appsody/java-microprofile-dev-mode   0.2                 ad81b68a6079        2 hours ago         1.07GB
+appsody/java-microprofile-dev-mode   0.2.10              ad81b68a6079        2 hours ago         1.07GB
+appsody/java-microprofile-dev-mode   latest              ad81b68a6079        2 hours ago         1.07GB
+```
+
+`appsody init` will always configure the application to use the version with two digits, which is "0.2" in this case:
+
+```
+cd "${workshop_dir}/java-example
+cat .appsody-config.yaml
+
+stack: appsody/java-microprofile-dev-mode:0.2
+```
+
+That means application developers will see their next call to `appsody run` to automatically pick up new images tagged 0.2 when the application architect releases any stack tagged with a string starting with "0.2.", such as "0.2.11".
+
+For this scenario, we can modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1.
+
 
 ```
 cd "${workshop_dir}/stacks"
-find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.2.10" {} \; -print | grep experimental
-./experimental/java-microprofile-dev-mode/stack.yaml
-./experimental/java-microprofile-dev-mode/image/project/pom.xml
-./experimental/java-microprofile-dev-mode/templates/default/pom.xml
 
-# Replace all occurrences of 0.2.10 with 0.2.11
- find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2.10" {} \; -print  | xargs -Irepl sed -i "" "s|0.2.10|0.2.11|g" repl
+# Replace all occurrences of 0.2.10 with 0.3.1
+ find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2.10" {} \; -print  | xargs -Irepl sed -i "" "s|0.2.10|0.3.1|g" repl
 
 # Ensure the old version was replaced across all affected files
-find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2." {} \; -print 
+find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.3" {} \; -print 
+version: 0.3.1
 ./experimental/java-microprofile-dev-mode/stack.yaml
+    <version>0.3.1</version>
 ./experimental/java-microprofile-dev-mode/image/project/pom.xml
+        <version>0.3.1</version>
 ./experimental/java-microprofile-dev-mode/templates/default/pom.xml
-
 ```
 
-With the stack version updated, we can build it one last time before making the final test:
+We can now replace the `checkstyle:checkstyle` goal in the `mvn` invocation with `checkstyle:check`, which will fail the build in case of errors.
+
+Once again, we are making the modification to the application Dockerfile, located under:
+
+```
+${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/Dockerfile
+```
+
+Change the following line from:
+```
+RUN mvn checkstyle:checkstyle install -DskipTests -Dcheckstyle.consoleOutput=true
+```
+
+to
+
+```
+RUN mvn checkstyle:check install -DskipTests -Dcheckstyle.consoleOutput=true
+```
+
+
+
+With the stack version and checkstyle goal updated, we can build the stack one last time:
 
 ```
 cd "${workshop_dir}/stacks"
 ./ci/build.sh . experimental/java-microprofile-dev-mode
 ```
 
-And execute the final application deployment:
+Now you will notice the new stack images and how 0.2 and 0.2.10 were left untouched.
 
 ```
-cd "${workshop_dir}/stacktest"
-appsody deploy
+docker images appsody/java-microprofile-dev-mode 
+
+REPOSITORY                           TAG                 IMAGE ID            CREATED              SIZE
+appsody/java-microprofile-dev-mode   0                   37738c47f510        About a minute ago   1.07GB
+appsody/java-microprofile-dev-mode   0.3                 37738c47f510        About a minute ago   1.07GB
+appsody/java-microprofile-dev-mode   0.3.1               37738c47f510        About a minute ago   1.07GB
+appsody/java-microprofile-dev-mode   latest              37738c47f510        About a minute ago   1.07GB
+appsody/java-microprofile-dev-mode   0.2                 ad81b68a6079        3 hours ago          1.07GB
+appsody/java-microprofile-dev-mode   0.2.10              ad81b68a6079        3 hours ago          1.07GB
 ```
 
+With the new stack generated, the application architect will notify developers who are ready to make the switch to the new version about the stack availability, at which point the application developers can modify the appsody configuration in their application directory:
 
+```
+> cd "${workshop_dir}/java-example
 
-## Talk about stack semantic versioning ##
+# Modify the version in ".appsody-config.yaml" from 0.2 to 0.3
+# After saving the modification, you should see the following output:
+> cat .appsody-config.yaml
+stack: appsody/java-microprofile-dev-mode:0.3
 
-_TODO: Denilson to ask Graham about it_
- 
+# Modify the version in "pom.xml" from 0.2.10 to 0.3.1
+# After saving the modification, you should see the following output:
+
+> grep 0.3 pom.xml
+        <version>0.3.1</version>
+```
+
+With the new changes in place, and with the application updated to use the latest version of the stack, requests to `appsody build` will fail in case of static analysis errors:
+
+```
+> appsody build
+
+...
+[Docker] Step 8/13 : RUN mvn checkstyle:check install -DskipTests -Dcheckstyle.consoleOutput=true
+...
+[Docker] [ERROR] src/main/java/dev/appsody/starter/StarterApplication.java:[6] (javadoc) JavadocType: Missing a Javadoc comment.
+[Docker] [INFO] ------------------------------------------------------------------------
+[Docker] [INFO] BUILD FAILURE
+[Docker] [INFO] ------------------------------------------------------------------------
+[Docker] [INFO] Total time:  5.727 s
+[Docker] [INFO] Finished at: 2019-09-06T22:37:46Z
+[Docker] [INFO] ------------------------------------------------------------------------
+[Docker] [ERROR] Failed to execute goal org.apache.maven.plugins:maven-checkstyle-plugin:3.1.0:check (default-cli) on project starter-app: You have 84 Checkstyle violations. -> [Help 1]
+...
+[Docker] [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[Docker] The command '/bin/sh -c mvn checkstyle:check install -DskipTests -Dcheckstyle.consoleOutput=true' returned a non-zero code: 1
+[Error] exit status 1
+
+```
