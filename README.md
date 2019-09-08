@@ -26,8 +26,9 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
   - [Developing Cloud-native applications - Codewind](#developing-cloud-native-applications---codewind)
     - [Using a Custom Appsody Stack from Codewind](#using-a-custom-appsody-stack-from-codewind)
     - [Creating a new Codewind Project](#creating-a-new-codewind-project)
-    - [Create an Appsody Project via Codewind](#create-an-appsody-project-via-codewind)
-    - [Writing the Code](#writing-the-code)
+    - [Looking Inside the Container](#looking-inside-the-container)
+    - [Viewing Application Metrics](#viewing-application-metrics)
+    - [Running Load Tests](#running-load-tests)
     - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
   - [Working with Appsody Collections](#working-with-appsody-collections)
     - [Stacks](#stacks)
@@ -36,7 +37,6 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Build/CD](#Build/CD)
       - [Collection Scenario 3: Add static code verification to build process](#Collection-Scenario-3:-Add-static-code-verification-to-build-process)
       - [Collection Scenario 4: Stack versioning](#Collection-Scenario-4:-Stack-versioning)
-
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
@@ -565,7 +565,7 @@ NAME                                          DESIRED   CURRENT   READY   AGE
 replicaset.apps/appsody-operator-5bbbc784b7   1         1         1       6d21h
 ```
 
-What if I you decide you want to see the Container and Kubernetes that Appsody is using, or you want to take your project elsewhere?  You can do this as follows. Enter:
+What if you decide you want to see the Container and Kubernetes configuration that Appsody is using, or you want to take your project elsewhere?  You can do this as follows. Enter:
 
 ```
 appsody extract
@@ -586,7 +586,7 @@ Running command: docker[rm kabanero-workshop-extract -f]
 Project extracted to /Users/charters/.appsody/extract/kabanero-workshop
 ```
 
-Let's take a look at the output:
+Let's take a look at the extracted project:
 
 ```
 cd ~/.appsody/extract/kabanero-workshop
@@ -613,44 +613,50 @@ drwxr-xr-x  11 charters  staff   352  3 Sep 15:08 user-app
 
 These are the files for the project, including those provided by the stack.  For example, the `pom.xml` is the parent pom for your application, and the `Dockerfile` is the one used to build and package the application.  The `user-app` is the maven project for your application.
 
-That's it for the Appsody part of the workshop.  You've seen how Appsody stacks and templates make it easy to get started with a new project with a curated and consistent dev and production environment. You've also seen how Appsody makes it really easy to build production-ready containers and deploy them to a Kubernetes environment.  Let's now take a look at Codewind.
+That's it for the Appsody part of the workshop.  You've seen how Appsody `stacks` and `templates` make it easy to get started with a new project with a curated and consistent dev and production environment. You've also seen how Appsody makes it really easy to build production-ready containers and deploy them to a Kubernetes environment.  Let's now take a look at Codewind.
 
 ## Developing Cloud-native applications - Codewind
 
 ### Using a Custom Appsody Stack from Codewind
 
-We first need to teach Codewind about our Custom Appsody stack.  This is currently a manual task but in the not to distant future we expect Codewind to include UI to do this.
+By default, Codewind has integration for the Appsody stacks released by the Appsody project.  However, the stack we're using is a custom one.  As we mentioned earlier, this could be a stack that's been designed to conform to company standards or industry compliance requirements meaning we as developers don't need to worry about those things.  
 
-Follow these instructions - https://www.eclipse.org/codewind/mdt-vsc-usingadifferenttemplate.html
+We've released the project to github so you don't need to build the artefacts required by Codewind.
 
-The file we want to add was created as part of the initial setup. Go to the location of your build of the custom stack:
+You need to edit a Codewind configuration file to point to the released repository.
 
-**TODO**: Where is this?
-```
-cd ???
-```
+Locate the Codewind workspace (usually `~/codewind-workspace`)
 
-Find the location of the file required by Codewind:
+Edit the following file:
 
 ```
-$PWD/ci/assets/experimental-index.json
+~/codewind-workspace/.config/repository_list.json
 ```
 
-E.g. `/Users/charters/kabanero-workshop/stacks/ci/assets/experimental-index.json
+Add the following entry:
 
+```json
+{
+  {
+    "url": "https://github.com/gcharters/stacks/releases/download/java-microprofile-dev-mode-v0.2.10/experimental-index.json",
+    "description": "Appsody Experimental"
+  },
+  ...
+}
+```
 
-### Creating a new Codewind Project
-...
+This points to a json file that tells Codewind about the custom stack.
 
-
-We've seen how the Appsody CLI helps create, build and deploy projects based on stacks and templates.  Let's now see how Codewind augments the Appsody experience with tools for cloud-native development.
-
-In VS Code, make sure Codewind is running:
+Restart `Codewind` by turing it off and then on again using the green slider shown below:
 
 <img src="images/codewind-running.png" width="40%" height="40%">
 
+You're now ready to use the custom Appsody stack from within Codewind.
 
 
+### Creating a new Codewind Project
+
+We've seen how the Appsody CLI helps create, build and deploy projects based on stacks and templates.  Let's now see how Codewind augments the Appsody experience with tools for cloud-native development.
 
 We're going to start by creating a new MicroProfile project. These first steps are the same for all the supported project types. 
 
@@ -658,15 +664,35 @@ To get started with writing the project, hover over the **Projects** entry under
 
 <img src="images/new-project.png" width="40%" height="40%">
 
-From the list which appears, select the **Appsody Java MicroProfile template**, and give the project a name. This project contains all the boiler-plate code to get started with developing a Java MicroProfile application.
+You should see a list of project types you can create.  The first one should be the custom Appsody project type, `Appsody Eclipse MicroProfile(r) Dev Mode template`.
 
-The project will be built and started inside a container.  To see the progrees you can **right click** on the project, and select **Show all logs**.  Eventually, the status of the project should change to **Running**.
+<img src="images/new-mpdm-proj.png" width="40%" height="40%">
 
-<img src="images/new-running.png" width="50%" height="50%">
+Select the `Appsody Eclipse MicroProfile(r) Dev Mode template` and in the next field give the project a name, e.g `kabanero-mp-project`
 
-To access the application endpoint in a browser, select the **Open App** icon <img src="images/open-app.png" width="3%" height="3%"> next to the project's name.  You call also open the app by right clicking on the project and selecting **Open App**.
+<img src="images/new-mpdm-proj2.png" width="40%" height="40%">
 
-Let's take a look at the code.  In the **VS Code EXPLORER** you should see an entry with your project name.  Expand this and the sub-twisties to show all the files created from the Appsody template (Note, the template is not intended to be a sample as most people would end up having to delete the code each time, it aims to provide the starter code, server configuration and build to which you can add your code).
+Press `Enter` to create the project.
+
+The project has been generated and will now be building.  To see the progress, expand `Codewind` -> `Projects` and right click the menu options `Show all logs`:
+
+<img src="images/show-all-logs.png" width="40%" height="40%">
+
+After a little while you should see the follow log message:
+
+```
+[Container] [[1;34mINFO[m] [AUDIT   ] CWWKF0011I: The defaultServer server is ready to run a smarter planet. The defaultServer server started in 69.467 seconds.
+```
+
+And the state for the project should change to `Running`:
+
+<img src="images/running.png" width="50%" height="50%">
+
+The generated project contains all the boiler-plate code to get started with developing a Java MicroProfile application.  This is the exact same code we saw generated for the new Appsody project.
+
+To access the application endpoint in a browser, select the **Open App** icon <img src="images/open-app.png" width="3%" height="3%"> next to the project's name, or right-click on the project and select the `Open App` menu option. This opens up the application in the running container showing the `Welcome to your Appsody Microservice` page.
+
+Let's take a look at the code.  In the **VS Code EXPLORER** you should see a `CODEWIND-WORKSPACE` entry with your project name.  If you don't find it, right-click on the project and choose `Add Folder to Workspace`.  In the workspace view, expand the project and the sub-folders to show all the files created from the Appsody template (Note, the template is not intended to be a sample as most people would end up having to delete the code each time, it aims to provide the starter code, server configuration and build to which you can add your code).
 
 <img src="images/template-code.png" width="50%" height="50%">
 
@@ -692,96 +718,53 @@ public class StarterResource {
 
 Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser. Let's see this in action.
 
-To illustrate this, we will create a basic JAX-RS resource with a GET method, which will return a print statement when the endpoint is called. First, to get a better development view, right click on the project in the **Explorer** in **Visual Studio Code**, and press **Open Folder as Workspace**. The project and its directories will now appear in the **Explorer**.
-
-As stated previously, any changes to your project will be picked up and built automatically. Therefore, if you click the **Open App** icon, and append `/starter/resource` to URL and hit this endpoint, you should see the following output in the **Visual Studio Code** logs:
+If you stil have the logs `OUTPUT` tab open you will see that the code is compile and the application restarted. You should see messages like:
 
 ```
-Your endpoint is working!
+[Container] [[1;34mINFO[m] Source compilation was successful.
+[Container] [[1;34mINFO[m] [AUDIT   ] CWWKT0017I: Web application removed (default_host): http://04013dbc9c11:9080/
+[Container] [[1;34mINFO[m] [AUDIT   ] CWWKZ0009I: The application starter-app has stopped successfully.
+[Container] [[1;34mINFO[m] [WARNING ] CWMH0053W: The readiness health check reported a DOWN overall status because the following applications have not started yet: [starter-app]
+[Container] [[1;34mINFO[m] [AUDIT   ] CWWKT0016I: Web application available (default_host): http://04013dbc9c11:9080/
 ```
 
-Congratulations! You have learnt how to develop an  application with **Codewind** and **Appsody**, without worrying about the containerisation and packaging of the application. If you already have **Appsody** installed via the **CLI**, we recommend that you [share the Appsody configuration between the CLI and Visual Studio Code](#), to keep all your **Appsody** projects together.
-
-
-### Create an Appsody Project via Codewind
-
-
-
-Now that the CLI tool is correctly installed, we can now begin to create **Appsody** projects via the command line. To view the list of supported project stacks, enter the following command into your terminal:
-```
-$ appsody list
-```
-
-As of August 2019, the following stacks are supported:
-```
-ID               	VERSION	DESCRIPTION                                
-java-spring-boot2	0.3.2  	Spring Boot using OpenJ9 and Maven         
-nodejs-express   	0.2.2  	Express web framework for Node.js          
-nodejs           	0.2.2  	Runtime for Node.js applications           
-swift            	0.1.0  	Runtime for Swift applications             
-java-microprofile	0.2.4  	Eclipse MicroProfile using OpenJ9 and Maven
-```
-
-To view the most current list of supported stacks, scroll down to the [Application Stacks](https://appsody.dev/) section on the **Appsody** homepage.
-
-For this tutorial, we will create a **Java MicroProfile** project, by executing the following commands:
-```
-$ mkdir my-java-project
-$ cd my-java-project
-$ appsody init java-microprofile
-```
-
-The project and its dependencies will then be retrieved.
-
-### Writing the Code
-To begin editing the code, open the project in your preferred editor.
-
-If you shared the **Appsody** Configuration between the CLI and **Visual Studio Code**, installed the **Appsody Extension** for the **Visual Studio Code Codewind Extension** as mentioned previously, and created the project in your **codewind-workspace** directory you can chose to import the CLI generated **Appsody** project into your editor's workspace as a **Codewind** project.
-
-For example, with **Visual Studio Code**, import the project by hovering over the **Codewind** section in the **Explorer** view, and press the **Add Existing Project** icon. Enabling the application here will enable you to deploy and develop your application in real-time, viewing the changes as you make them.
-
-Else, if you do not want to use the **Visual Studio Code Codewind Extension**, execute following command to start a development container, and view your changes in real-time:
+Point your browser at the new resource (note, `<port>` is the port nubmer you saw when you first opened the application):
 
 ```
-$ appsody run
+http://127.0.0.1:<port>/starter/resource
 ```
 
-Applications built from the Java MicroProfile template will be served up at ` http://localhost:9080/`. Projects using different stacks, such as the **Node.js** template, will be hosted on different ports. See [the documentation](https://github.com/appsody/stacks/tree/master/incubator) for more information.
-
-Any changes you make to your code will automatically be built and deployed, and can be observed in your browser.
-
-To illustrate this, we will create a basic JAX-RS resource with a GET method, which will return a print statement when the endpoint is called.
-
-Open the project in your editor of choice and navigate to the `src/main/java/dev/appsody/starter` directory. Create a file called `StarterResource.java` - this will be our JAX-RS resource. Populate the file with the following code:
+You should see the following response:
 
 ```
-package dev.appsody.starter;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-
-@Path("/resource")
-public class StarterResource {
-
-    @GET
-    public void getRequest() {
-        System.out.println("Your endpoint is working!");
-    }
-
-}
+StarterResource response
 ```
 
-As stated previously, any changes to your project will be picked up and built automatically. Therefore, if you hit the `localhost:9080/starter/resource` URL in a browser, you should see the following output in the terminal where the `appsody run` command was executed:
+### Looking Inside the Container
 
-```
-Your endpoint is working!
-```
+During development you may need to look inside the container to see what's deployed and configured.  Codwind makes this easy.  Select the `Open Container Shell` option:
 
-Congratulations, you have learnt how to develop an application with **Kabanero** using the **CLI**!
+<img src="images/container-shell.png" width="50%" height="50%">
+
+The following shows the files and location where the shell opens inside the container.  This is the root of your project.
+
+<img src="images/shell.png" width="50%" height="50%">
+
+
+### Viewing Application Metrics
+
+<img src="images/start-metrics.png" width="50%" height="50%">
+
+
+### Running Load Tests
+
+<img src="images/start-perf.png" width="50%" height="50%">
 
 
 ### Deploy the Project to Knative or Kubernetes via the CLI
-To deploy the project using these technologies, navigate to the project's folder via the command line, and execute the following command:
+
+
+The project you created is an normal Appsody project and so can be worked with using the Appsody CLI.  As per the Appsody part of this workshop, deploy the applicatin to Kubernetes using:
 
 ```
  $ appsody deploy
@@ -789,7 +772,25 @@ To deploy the project using these technologies, navigate to the project's folder
 
 If this was successful, the output of this command should be:
 ```
-Deployment succeeded - check the Kubernetes pods for progress.
+Deployed project running at http://localhost:<port>
+```
+
+Test the endpoint by opening:
+
+```
+http://127.0.0.1:<port>/starter/resource
+```
+
+You should see the following response:
+
+```
+StarterResource response
+```
+
+Undeploy the application using:
+
+```
+appsody deploy delete
 ```
 
 Locate the deployment which hosts your application through the following command:
@@ -799,6 +800,7 @@ $ kubectl get all
 ```
 
 Copy the deployment's URL into a browser. Congratulations! Your application is now accessible through Knative/Kubernetes.
+
 
 ## Working with Appsody Collections
 
