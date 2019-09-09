@@ -942,9 +942,9 @@ docker network rm workshop_nw
 
 ### Build/CD ###
 
-A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysys, and many others.
+A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysys, and many others. A full Kabanero toolchain is implemented as a sequence of steps that happen both inside and outside the container boundaries, and this workshop covers the steps that happen within the container boundaries, such as compilation and packaging of binaries.
 
-These instructions are executed directly when the developer directly invokes `appsody build` or `appsody deploy` when Appsody detects code changes since the last build.
+This portion of the instructions is executed directly when the developer invokes `appsody build` or implicitly, when the developer invokes `appsody deploy` and there are outstanding code changes since the last build.
 
 #### Collection Scenario 3: Add static code verification to build process ####
 
@@ -998,9 +998,9 @@ appsody build
 
 #### Collection Scenario 4: Stack versioning  #### 
 
-Notice how the checkstyle modification from the previous scenario does not fail the build process, but rather prints a summary of errors for the developer.
+Appsody supports [semantic versioning](https://semver.org/) during development of stacks and applications. Notice how the checkstyle modification from the previous scenario does not fail the build process, but rather prints a summary of errors for the developer.
 
-This was done by design, as the application architect may want to give some time for the whole team to address the errors without suddenly disrupting their workflow.
+This decision was done by design, as an application architect may want to give some time for the whole team to address the errors without suddenly disrupting their workflow.
 
 In this scenario, we want to show how the application architect could release a new version of the stack that will not automatically get picked up by developers immediately after release, so we need to understand how Appsody tags stack images.
 
@@ -1024,9 +1024,9 @@ cat .appsody-config.yaml
 stack: appsody/java-microprofile-dev-mode:0.2
 ```
 
-That means application developers will see their next call to `appsody run` to automatically pick up new images tagged 0.2 when the application architect releases any stack tagged with a string starting with "0.2.", such as "0.2.11".
+That means application developers will see their next call to `appsody run` to automatically pick up new images tagged 0.2 when the application architect releases any stack with a tag name starting with "0.2.", such as "0.2.11".
 
-For this scenario, we can modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1.
+For this scenario, we want to modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1.
 
 
 ```
@@ -1045,7 +1045,7 @@ version: 0.3.1
 ./experimental/java-microprofile-dev-mode/templates/default/pom.xml
 ```
 
-We can now replace the `checkstyle:checkstyle` goal in the `mvn` invocation with `checkstyle:check`, which will fail the build in case of errors.
+We can now replace the `checkstyle:checkstyle` goal in the `mvn` invocation with `checkstyle:check`, which will fail the build in case of violations of coding guidelines.
 
 Once again, we are making the modification to the application Dockerfile, located under:
 
@@ -1126,3 +1126,7 @@ With the new changes in place, and with the application updated to use the lates
 [Error] exit status 1
 
 ```
+
+#### Further reading: Development versus production behavior ####
+
+The previous scenario showed a simple change, but Kabanero collections can acommodate more sophisticated behaviors, where the container image is setup with additional debugging capabilitites during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behavior can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
