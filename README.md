@@ -942,7 +942,7 @@ docker network rm workshop_nw
 
 ### Build/CD ###
 
-A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysys, and many others. A full Kabanero toolchain relies of sequence of steps that happen both inside and outside the container boundaries, and this workshop covers the steps that happen within the container boundaries, such as compilation and packaging of binaries.
+A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysys, and many others. A full Kabanero toolchain is implemented as a sequence of steps that happen both inside and outside the container boundaries, and this workshop covers the steps that happen within the container boundaries, such as compilation and packaging of binaries.
 
 This portion of the instructions is executed directly when the developer invokes `appsody build` or implicitly, when the developer invokes `appsody deploy` and there are outstanding code changes since the last build.
 
