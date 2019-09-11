@@ -32,11 +32,11 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
   - [Working with Appsody Collections](#working-with-appsody-collections)
     - [Stacks](#stacks)
-      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#Collection-Scenario-1:-Update-the-release-of-Open-Liberty-in-the-stack)
-      - [Collection Scenario 2: Custom application templates](#Collection-Scenario-2:-Custom-application-templates)
+      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
+      - [Collection Scenario 2: Custom application templates](#collection-scenario-2-custom-application-template)
     - [Build/CD](#Build/CD)
-      - [Collection Scenario 3: Add static code verification to build process](#Collection-Scenario-3:-Add-static-code-verification-to-build-process)
-      - [Collection Scenario 4: Stack versioning](#Collection-Scenario-4:-Stack-versioning)
+      - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
+      - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
