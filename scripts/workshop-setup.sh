@@ -145,7 +145,7 @@ function checksPrereqs {
     gitPrereqFailed=0
     which git &> /dev/null || gitPrereqFailed=1
     if [ ${gitPrereqFailed} -eq 1 ]; then
-        echo "ERROR: appsody CLI cannot be found."
+        echo "ERROR: git CLI cannot be found."
         prereqFailed=1
     else
         echo "INFO: git CLI installed: $(git version)"
