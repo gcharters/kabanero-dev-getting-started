@@ -890,10 +890,10 @@ In this stack, the [container image file](https://github.com/gcharters/stacks/bl
 <version.openliberty-runtime>19.0.0.7</version.openliberty-runtime>
 ```
 
-You can now modify the Open Liberty version to 19.0.0.8:
+You can now modify the Open Liberty version to 19.0.0.8, then use the `grep` command to inspect the change:
 ```
 sed -i "" "s|19.0.0.7|19.0.0.8|g" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
-# confirm the change
+
 grep "19.0.0" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
 ```
 
@@ -1074,16 +1074,18 @@ stack: appsody/java-microprofile-dev-mode:0.2
 
 That means application developers will see their next call to `appsody run` to automatically pick up new images tagged 0.2 when the application architect releases any stack with a tag name starting with "0.2.", such as "0.2.11".
 
-For this scenario, we want to modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1.
+For this scenario, we want to modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1. We first replace all occurrences of 0.2.10 with 0.3.1:
 
 
 ```
 cd "${workshop_dir}/stacks"
 
-# Replace all occurrences of 0.2.10 with 0.3.1
  find ./experimental/java-microprofile-dev-mode -type f -exec grep -q "0.2.10" {} \; -print  | xargs -Irepl sed -i "" "s|0.2.10|0.3.1|g" repl
+```
 
-# Ensure the old version was replaced across all affected files
+Then we inspect the changes to ensure the old version was replaced across all affected files:
+
+```
 find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.3" {} \; -print 
 version: 0.3.1
 ./experimental/java-microprofile-dev-mode/stack.yaml
@@ -1137,17 +1139,19 @@ appsody/java-microprofile-dev-mode   0.2.10              ad81b68a6079        3 h
 
 With the new stack generated, the application architect will notify developers who are ready to make the switch to the new version about the stack availability, at which point the application developers can modify the appsody configuration in their application directory:
 
-```
-> cd "${workshop_dir}/java-example
+Modify the version in "${workshop_dir}/java-example/.appsody-config.yaml" from 0.2 to 0.3
 
-# Modify the version in ".appsody-config.yaml" from 0.2 to 0.3
-# After saving the modification, you should see the following output:
+After saving the modification, you should see the following output:
+
+```
 > cat .appsody-config.yaml
 stack: appsody/java-microprofile-dev-mode:0.3
+```
 
-# Modify the version in "pom.xml" from 0.2.10 to 0.3.1
-# After saving the modification, you should see the following output:
+Now modify the version in "pom.xml" from 0.2.10 to 0.3.1.
+After saving the modification, you should see the following output:
 
+```
 > grep 0.3 pom.xml
         <version>0.3.1</version>
 ```
