@@ -32,11 +32,11 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
   - [Working with Appsody Collections](#working-with-appsody-collections)
     - [Stacks](#stacks)
-      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#Collection-Scenario-1:-Update-the-release-of-Open-Liberty-in-the-stack)
-      - [Collection Scenario 2: Custom application templates](#Collection-Scenario-2:-Custom-application-templates)
+      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
+      - [Collection Scenario 2: Custom application templates](#collection-scenario-2-custom-application-template)
     - [Build/CD](#Build/CD)
-      - [Collection Scenario 3: Add static code verification to build process](#Collection-Scenario-3:-Add-static-code-verification-to-build-process)
-      - [Collection Scenario 4: Stack versioning](#Collection-Scenario-4:-Stack-versioning)
+      - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
+      - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
@@ -755,19 +755,61 @@ The following shows the files and location where the shell opens inside the cont
 
 <img src="images/shell.png" width="50%" height="50%">
 
+You can navigate around the `src` and `target` directories to see the code on disk and the Liberty server and built application deployment.
 
 ### Viewing Application Metrics
 
+Let's take a look at the application metrics built in to Codewind.  Right-click on the application and select `Open Application Monitor`:
+
 <img src="images/start-metrics.png" width="50%" height="50%">
 
+This should open a page in your browser showing the java metrics dashboard with CPU, HTTP, Heap and GC data.  To make it more interesting, hit the REST endpoint a few times to see the effects.  You should end up with a dashboard looking something like:
+
+<img src="images/metrics.png" width="50%" height="50%">
+
+The dashboard helps you understand the runtime characteristics of your service.  Keep the dashboard open for now.
 
 ### Running Load Tests
 
+Let's now take a look at the load testing support of Codewind.  Right-click on the application and select `Open Performance Dashboard`:
+
 <img src="images/start-perf.png" width="50%" height="50%">
 
+In a browser tab you should see the Codewind performance dashboard.  Click on `Edit load run settings` and change the path to point to the REST service endpoint `/starter/resource` and click `Save` to save the settings.  Click `Run Load Test`, in the dialog, give the test a name `Test 1` and choose `Run`:
+
+<img src="images/performance-dash.png" width="50%" height="50%">
+
+Wnen the tests are complete you should see results similar to the following (you may need to click refresh in the browser).  Click the check-boxes for `Repsonse`, `Hits`, `CPU` and `Memory`.
+
+<img src="images/test1.png" width="50%" height="50%">
+
+To see the effect of the load test on the service, take a look at the metrics dashboard you opened earlier.  You should spikes in the various measures.
+
+<img src="images/metrics-dash-test1.png" width="50%" height="50%">
+
+Let's do some development and degrade the performance of the services.  Update the `GET` method with the following and save the file.  As before, the application will be automatically updated:
+
+```Java
+    @GET
+    public String getRequest() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "StarterResource response";
+    }
+  ```
+
+In the performance dashboard, click `Run Load Test`, give the test another name, e.g. `Test 2`, and click `Run`.  When the tests complete, you should see results simliar to the following:
+
+<img src="images/performance-test2.png" width="50%" height="50%">
+
+We can see clearly from the chart that the response time has increased.  Revisit the metrics dashboard and we can also see the response time increase:
+
+<img src="images/metrics-test2.png" width="50%" height="50%">
 
 ### Deploy the Project to Knative or Kubernetes via the CLI
-
 
 The project you created is an normal Appsody project and so can be worked with using the Appsody CLI.  As per the Appsody part of this workshop, deploy the applicatin to Kubernetes using:
 
