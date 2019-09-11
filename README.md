@@ -29,15 +29,14 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Looking Inside the Container](#looking-inside-the-container)
     - [Viewing Application Metrics](#viewing-application-metrics)
     - [Running Load Tests](#running-load-tests)
-- [confirm the change](#confirm-the-change)
-- [Start postgresql](#start-postgresql)
-- [Replace all occurrences of 0.2.10 with 0.3.1](#replace-all-occurrences-of-0210-with-031)
-- [Ensure the old version was replaced across all affected files](#ensure-the-old-version-was-replaced-across-all-affected-files)
-- [Modify the version in ".appsody-config.yaml" from 0.2 to 0.3](#modify-the-version-in-%22appsody-configyaml%22-from-02-to-03)
-- [After saving the modification, you should see the following output:](#after-saving-the-modification-you-should-see-the-following-output)
-- [Modify the version in "pom.xml" from 0.2.10 to 0.3.1](#modify-the-version-in-%22pomxml%22-from-0210-to-031)
-- [After saving the modification, you should see the following output:](#after-saving-the-modification-you-should-see-the-following-output-1)
-      - [Further reading: Development versus production behavior](#further-reading-development-versus-production-behavior)
+    - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
+  - [Working with Appsody Collections](#working-with-appsody-collections)
+    - [Stacks](#stacks)
+      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
+      - [Collection Scenario 2: Custom application templates](#collection-scenario-2-custom-application-template)
+    - [Build/CD](#Build/CD)
+      - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
+      - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
