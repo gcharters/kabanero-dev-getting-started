@@ -42,17 +42,25 @@ function cacheDockerImages {
     echo
     gitCloneStack
 
+    local result=0
+
     app_temp_dir="${app_dir}-temp"
     rm -rf ${app_temp_dir}
     mkdir -p ${app_temp_dir}
     cd ${app_temp_dir}
-    appsody init java-microprofile
+    if [ ${cygwin} -eq 1 ]; then 
+        cmd /c 'appsody init java-microprofile'
+    else
+        appsody init java-microprofile
+    fi
     opendjk_local_docker_context_dir="${app_temp_dir}/tmp"
-    appsody extract --target-dir "${opendjk_local_docker_context_dir}"
-    cp "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
+    if [ ${cygwin} -eq 0 ]; then 
+        appsody extract --target-dir "${opendjk_local_docker_context_dir}"
 
-    opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
-    cat > "${opendjk_local_dockerfile}" <<EOF
+        cp "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
+
+        opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
+        cat > "${opendjk_local_dockerfile}" <<EOF
 FROM adoptopenjdk/openjdk8-openj9
 
 COPY pom.xml /project/ 
@@ -69,11 +77,13 @@ RUN apt-get update && \
     rm -rf /project
 EOF
 
-    docker build "${opendjk_local_docker_context_dir}" --tag openjdk8-openj9-local && \
-    docker image ls openjdk8-openj9-local
-    local result=$?
+        docker build "${opendjk_local_docker_context_dir}" --tag openjdk8-openj9-local && \
+        docker image ls openjdk8-openj9-local
+        local result=$?
 
-    rm -rf "${app_temp_dir}"
+        rm -rf "${app_temp_dir}"
+        result=$?
+    fi
 
     echo
     echo "INFO: Caching additional docker images to be used in examples."
@@ -112,7 +122,6 @@ function cacheStacks {
     (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
     appsody stop --name workshop_prep_container
 
-
     echo "INFO: Clearing all temporary content"
     appsody repo remove ${appsody_repo}
     docker rmi ${app_name}:latest
@@ -145,7 +154,7 @@ function checksPrereqs {
     gitPrereqFailed=0
     which git &> /dev/null || gitPrereqFailed=1
     if [ ${gitPrereqFailed} -eq 1 ]; then
-        echo "ERROR: appsody CLI cannot be found."
+        echo "ERROR: git CLI cannot be found."
         prereqFailed=1
     else
         echo "INFO: git CLI installed: $(git version)"
@@ -241,6 +250,14 @@ function cleanWorkshop() {
     docker rmi openjdk8-openj9-local
 }
 
+
+# OS specific support. $var _must_ be set to either true or false.
+cygwin=0;
+case "`uname`" in
+  CYGWIN*) cygwin=1;;
+esac
+
+
 echo
 echo "INFO: Workshop preparation starting..."
 echo
@@ -254,8 +271,7 @@ if [ ${result} -eq 0 ]; then
     result=$?
 fi
 
-
-if [ ${result} -eq 0 ]; then
+if [ ${cygwin} -eq 0 ] && ${result} -eq 0 ]; then
     echo
     cacheStacks
     result=$?
@@ -267,12 +283,11 @@ fi
 #
 env_file="${workshop_dir}/env.sh"
 cat > "${env_file}" << EOF
-export CODEWIND_INDEX=false
+export CODEWIND_INDEX=true
 export WORKSHOP_DIR=${workshop_dir}
 export workshop_dir=${workshop_dir}
 EOF
 chmod u+x "${env_file}"
-
 
 echo
 echo "INFO: Workshop preparation ready at ${workshop_dir}"
