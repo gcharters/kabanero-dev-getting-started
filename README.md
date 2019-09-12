@@ -177,7 +177,7 @@ appsodyhub           	swift                     	0.1.4    	*simple  	Runtime for
 
 You'll see that with the stacks available, we can develop new cloud-native applications using Java, Node or Swift, with a number of different, popular frameworks.
 
-These are the default stacks that Appsody provides.  We're going to use a custom stack and to do so we need ot take a look at where the stacks come from.  This is where the concept of repositories comes in.  Type the following:
+These are the default stacks that Appsody provides.  We're going to use a custom stack and to do so we need to take a look at where the stacks come from.  This is where the concept of repositories comes in.  Type the following:
 
 ```
 appsody repo list
