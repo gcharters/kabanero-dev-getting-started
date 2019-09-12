@@ -70,9 +70,11 @@ COPY user-app/pom.xml /project/user-app/
 RUN apt-get update && \
     apt-get install -y maven unzip && \
     sed -i "s|19.0.0.8|19.0.0.7|g" /project/pom.xml && \
+    mvn -q -B -f /project/pom.xml install dependency:go-offline && \
     mvn -q -B -f /project/user-app/pom.xml checkstyle:checkstyle install dependency:go-offline && \
     mvn -q -B -f /project/pom-dev.xml checkstyle:checkstyle install dependency:go-offline && \
     sed -i "s|19.0.0.7|19.0.0.8|g" /project/pom.xml && \
+    mvn -q -B -f /project/pom.xml install dependency:go-offline && \
     mvn -q -B -f /project/user-app/pom.xml dependency:go-offline && \
     rm -rf /project
 EOF
@@ -271,7 +273,7 @@ if [ ${result} -eq 0 ]; then
     result=$?
 fi
 
-if [ ${cygwin} -eq 0 ] && ${result} -eq 0 ]; then
+if [ ${cygwin} -eq 0 ] && [ ${result} -eq 0 ]; then
     echo
     cacheStacks
     result=$?
