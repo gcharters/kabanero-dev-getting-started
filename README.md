@@ -45,7 +45,8 @@ Before you get started, there are a number of pre-reqs you'll need to install.  
 
 For **Windows users** only: 
 * Due to the Docker Destop dependency mentioned below, this workshop requires Windows users to have either a Windows 10 Pro or Windows 10 Enterprise installation
-* Whereas the developer experience for Kabanero supports Windows users, this workshop also covers the experience for Kabanero architects, which depends on a Linux shell environment such as [Cygwin](https://www.cygwin.com/).
+* Whereas the developer experience for Kabanero supports Windows users, this workshop also covers the experience for Kabanero architects, which depends on a Linux shell environment. The instructions for this workshop have been tested with [Cygwin](https://www.cygwin.com/).
+* Ensure your Cygwin home directory matches your Windows home directory, as described in [this blog entry](https://ryanharrison.co.uk/2015/12/01/cygwin-change-home-directory.html).
 * The workshop content has not been validated against the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl) . The Docker CLI running inside WSL requires special settings to communicate with Docker Desktop running on Windows and that configuration is outside the scope of the validated instructions.
 
 For all users, you need to install the following pre-requisites to complete this tutorial:
