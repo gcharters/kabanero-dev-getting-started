@@ -34,7 +34,7 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Stacks](#stacks)
       - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
       - [Collection Scenario 2: Custom application templates](#collection-scenario-2-custom-application-template)
-    - [Build/CD](#Build/CD)
+    - [Build/CD](#buildcd)
       - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
       - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
 
