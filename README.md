@@ -29,14 +29,8 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Looking Inside the Container](#looking-inside-the-container)
     - [Viewing Application Metrics](#viewing-application-metrics)
     - [Running Load Tests](#running-load-tests)
-    - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
-  - [Working with Appsody Collections](#working-with-appsody-collections)
-    - [Stacks](#stacks)
-      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
-      - [Collection Scenario 2: Custom application templates](#collection-scenario-2-custom-application-template)
-    - [Build/CD](#buildcd)
-      - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
-      - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
+- [Start postgresql](#start-postgresql)
+      - [Further reading: Development versus production behaviour](#further-reading-development-versus-production-behaviour)
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
@@ -85,9 +79,6 @@ Verify that the CLI tool is installed correctly by executing the following into 
 ```
 $ appsody
 ```
-
-
- **TODO:** *The following section may no longer be required, but we do need to teach Codewind about the custom stack*
 
 #### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
