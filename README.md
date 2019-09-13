@@ -44,10 +44,10 @@ Before you get started, there are a number of pre-reqs you'll need to install.  
 ### Pre-requisites
 
 For **Windows users** only: 
-* Due to the Docker Destop dependency mentioned below, this workshop requires Windows users to have either a Windows 10 Pro or Windows 10 Enterprise installation
+* Due to the Docker Desktop dependency mentioned below, this workshop requires Windows users to have either a Windows 10 Pro or Windows 10 Enterprise installation
 * Whereas the developer experience for Kabanero supports Windows users, this workshop also covers the experience for Kabanero architects, which depends on a Linux shell environment. The instructions for this workshop have been tested with [Cygwin](https://www.cygwin.com/).
 * Ensure your Cygwin home directory matches your Windows home directory, as described in [this blog entry](https://ryanharrison.co.uk/2015/12/01/cygwin-change-home-directory.html).
-* The workshop content has not been validated against the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl) . The Docker CLI running inside WSL requires special settings to communicate with Docker Desktop running on Windows and that configuration is outside the scope of the validated instructions.
+* The workshop content has not been validated against the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl) . The Docker CLI running inside WSL requires special settings to communicate with Docker Desktop running on Windows, and that configuration is outside the scope of the validated instructions.
 
 For all users, you need to install the following pre-requisites to complete this tutorial:
 
@@ -65,9 +65,9 @@ You will need to enable Kubernetes as this is disabled by default in Docker Desk
 ### Visual Studio Code Kabanero Setup
 
 #### Installing the Codewind Extension for Visual Studio Code
-Eclipse Codewind provides a set of extension to IDEs for doing cloud-native application development.  The enable a full developer/debug cycle with incremental build where all the code is built and run inside a container.  This means that the likelihood of issues due to different development, build and production environments is vastly reduced.
+Eclipse Codewind provides a set of extensions to IDEs for doing cloud-native application development.  They enable a full developer/debug cycle with an incremental build where all the code is built and run inside a container.  This means that the likelihood of issues due to different development, build and production environments is vastly reduced.
 
-Although Codewind is an Eclipse project, it's not limited to the Eclipse IDE and in this tutorial you will use Codewin inside Visual Studio Code.
+Although Codewind is an Eclipse project, it's not limited to the Eclipse IDE and in this tutorial, you will use Codewind inside Visual Studio Code.
 
 Codewind requires Docker, so before you begin, ensure your Docker install is complete and running.
 
@@ -87,7 +87,7 @@ $ appsody
 ```
 
 
- **TODO:** *The following section may no longer required but we do need to teach Codewind about the custom stack*
+ **TODO:** *The following section may no longer be required, but we do need to teach Codewind about the custom stack*
 
 #### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
@@ -177,7 +177,7 @@ appsodyhub           	swift                     	0.1.4    	*simple  	Runtime for
 
 You'll see that with the stacks available, we can develop new cloud-native applications using Java, Node or Swift, with a number of different, popular frameworks.
 
-These are the default stacks that Appsody provides.  We're going to use a custom stack and to do so we need ot take a look at where the stacks come from.  This is where the concept of repositories comes in.  Type the following:
+These are the default stacks that Appsody provides.  We're going to use a custom stack and to do so we need to take a look at where the stacks come from.  This is where the concept of repositories comes in.  Type the following:
 
 ```
 appsody repo list
@@ -291,7 +291,7 @@ Create the new project.  This project will using the Java MicroProfile APIs defi
 appsody init workshop/java-microprofile-dev-mode
 ```
 
-When the build completes you should see something like:
+When the build completes, you should see something like:
 
 ```
 ...
@@ -369,7 +369,7 @@ To:
     <groupId>kabanero-workshop</groupId>
 ```
 
-Save the file.  You'll see a message that `liberty:dev` mode does not handle `pom.xml` changes.  Instead the Appsody stack has been configure to trigger a maven rebuild.  Wait for the rebuild to complete and the message to say the application has started to be printed:
+Save the file.  You'll see a message that `liberty:dev` mode does not handle `pom.xml` changes.  Instead, the Appsody stack has been configured to trigger a maven rebuild.  Wait for the rebuild to complete and the message to say the application has started to be printed:
 
 ```
 A CWWKZ0001I: Application starter-app started in 9.393 seconds..
@@ -377,7 +377,7 @@ A CWWKZ0001I: Application starter-app started in 9.393 seconds..
 
 Let's now make a code change.  The Java MicroProfile stack we're using takes advantage of `liberty:dev` mode to dynamically update the running application without needing a lengthy maven rebuild. 
 
-First navigate to the JAX-RS application endpoint to confirm that there are no JAX-RS resources available.  Open the following link in your browser:
+First, navigate to the JAX-RS application endpoint to confirm that there are no JAX-RS resources available.  Open the following link in your browser:
 
 http://localhost:9080/starter
 
@@ -625,9 +625,9 @@ That's it for the Appsody part of the workshop.  You've seen how Appsody `stacks
 
 ### Using a Custom Appsody Stack from Codewind
 
-By default, Codewind has integration for the Appsody stacks released by the Appsody project.  However, the stack we're using is a custom one.  As we mentioned earlier, this could be a stack that's been designed to conform to company standards or industry compliance requirements meaning we as developers don't need to worry about those things.  
+By default, Codewind has integration for the Appsody stacks released by the Appsody project.  However, the stack we're using is a custom one.  As we mentioned earlier, this could be a stack that's been designed to conform to company standards or industry compliance requirements, meaning we as developers don't need to worry about those things.  
 
-We've released the project to github so you don't need to build the artefacts required by Codewind.
+We've released the project to github, so you don't need to build the artefacts required by Codewind.
 
 You need to edit a Codewind configuration file to point to the released repository.
 
@@ -653,7 +653,7 @@ Add the following entry:
 
 This points to a json file that tells Codewind about the custom stack.
 
-Restart `Codewind` by turing it off and then on again using the green slider shown below:
+Restart `Codewind` by turning it off and then on again using the green slider shown below:
 
 <img src="images/codewind-running.png" width="40%" height="40%">
 
@@ -724,7 +724,7 @@ public class StarterResource {
 
 Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser. Let's see this in action.
 
-If you stil have the logs `OUTPUT` tab open you will see that the code is compile and the application restarted. You should see messages like:
+If you still have the logs `OUTPUT` tab open you will see that the code is compiled and the application restarted. You should see messages like:
 
 ```
 [Container] [[1;34mINFO[m] Source compilation was successful.
@@ -734,7 +734,7 @@ If you stil have the logs `OUTPUT` tab open you will see that the code is compil
 [Container] [[1;34mINFO[m] [AUDIT   ] CWWKT0016I: Web application available (default_host): http://04013dbc9c11:9080/
 ```
 
-Point your browser at the new resource (note, `<port>` is the port nubmer you saw when you first opened the application):
+Point your browser at the new resource (note, `<port>` is the port number you saw when you first opened the application):
 
 ```
 http://127.0.0.1:<port>/starter/resource
@@ -780,11 +780,11 @@ In a browser tab you should see the Codewind performance dashboard.  Click on `E
 
 <img src="images/performance-dash.png" width="50%" height="50%">
 
-Wnen the tests are complete you should see results similar to the following (you may need to click refresh in the browser).  Click the check-boxes for `Repsonse`, `Hits`, `CPU` and `Memory`.
+When the tests are complete you should see results similar to the following (you may need to click refresh in the browser).  Click the check-boxes for `Response`, `Hits`, `CPU` and `Memory`.
 
 <img src="images/test1.png" width="50%" height="50%">
 
-To see the effect of the load test on the service, take a look at the metrics dashboard you opened earlier.  You should spikes in the various measures.
+To see the effect of the load test on the service, take a look at the metrics dashboard you opened earlier.  You should see spikes in the various measures.
 
 <img src="images/metrics-dash-test1.png" width="50%" height="50%">
 
@@ -802,7 +802,7 @@ Let's do some development and degrade the performance of the services.  Update t
     }
   ```
 
-In the performance dashboard, click `Run Load Test`, give the test another name, e.g. `Test 2`, and click `Run`.  When the tests complete, you should see results simliar to the following:
+In the performance dashboard, click `Run Load Test`, give the test another name, e.g. `Test 2`, and click `Run`.  When the tests complete, you should see results similar to the following:
 
 <img src="images/performance-test2.png" width="50%" height="50%">
 
@@ -812,7 +812,7 @@ We can see clearly from the chart that the response time has increased.  Revisit
 
 ### Deploy the Project to Knative or Kubernetes via the CLI
 
-The project you created is an normal Appsody project and so can be worked with using the Appsody CLI.  As per the Appsody part of this workshop, deploy the applicatin to Kubernetes using:
+The project you created is a normal Appsody project and so can be worked with using the Appsody CLI. As per the Appsody part of this workshop, deploy the application to Kubernetes using:
 
 ```
  $ appsody deploy
@@ -990,13 +990,13 @@ docker network rm workshop_nw
 
 ### Build/CD ###
 
-A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysys, and many others. A full Kabanero toolchain is implemented as a sequence of steps that happen both inside and outside the container boundaries, and this workshop covers the steps that happen within the container boundaries, such as compilation and packaging of binaries.
+A collection also specifies how applications should be built and packaged, encoding conventions about compilation aspects, packaging tooling, unit test enforcement, static code analysis, and many others. A full Kabanero toolchain is implemented as a sequence of steps that happen both inside and outside the container boundaries, and this workshop covers the steps that happen within the container boundaries, such as compilation and packaging of binaries.
 
 This portion of the instructions is executed directly when the developer invokes `appsody build` or implicitly, when the developer invokes `appsody deploy` and there are outstanding code changes since the last build.
 
 #### Collection Scenario 3: Add static code verification to build process ####
 
- In this scenario, the entire team discussed ways of making code reviews more efficient, and agreed on ensuring minimal coding guidelines for all applications based on that stack. 
+ In this scenario, the entire team discussed ways of making code reviews more efficient and agreed on ensuring minimal coding guidelines for all applications based on that stack. 
 
 After considering multiple tools, the team agreed on using [Checkstyle](https://maven.apache.org/plugins/maven-checkstyle-plugin/usage.html) , and the application architect can make that modification to the stack image itself. 
 
@@ -1046,7 +1046,7 @@ appsody build
 
 #### Collection Scenario 4: Stack versioning  #### 
 
-Appsody supports [semantic versioning](https://semver.org/) during development of stacks and applications. Notice how the checkstyle modification from the previous scenario does not fail the build process, but rather prints a summary of errors for the developer.
+Appsody supports [semantic versioning](https://semver.org/) during development of stacks and applications. Notice how the checkstyle modification from the previous scenario does not fail the build process, but instead prints a summary of errors for the developer.
 
 This decision was done by design, as an application architect may want to give some time for the whole team to address the errors without suddenly disrupting their workflow.
 
@@ -1097,7 +1097,7 @@ version: 0.3.1
 
 We can now replace the `checkstyle:checkstyle` goal in the `mvn` invocation with `checkstyle:check`, which will fail the build in case of violations of coding guidelines.
 
-Once again, we are making the modification to the application Dockerfile, located under:
+Once again, we are modifying the application Dockerfile, located under:
 
 ```
 ${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/Dockerfile
@@ -1179,6 +1179,6 @@ With the new changes in place, and with the application updated to use the lates
 
 ```
 
-#### Further reading: Development versus production behavior ####
+#### Further reading: Development versus production behaviour ####
 
-The previous scenario showed a simple change, but Kabanero collections can acommodate more sophisticated behaviors, where the container image is setup with additional debugging capabilitites during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behavior can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
+The previous scenario showed a simple change, but Kabanero collections can accommodate more sophisticated behaviours, where the container image is setup with additional debugging capabilitites during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behaviour can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
