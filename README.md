@@ -29,6 +29,7 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Looking Inside the Container](#looking-inside-the-container)
     - [Viewing Application Metrics](#viewing-application-metrics)
     - [Running Load Tests](#running-load-tests)
+    - [Deploy the Project to Knative or Kubernetes via the CLI](#deploy-the-project-to-knative-or-kubernetes-via-the-cli)
   - [Working with Appsody Collections](#working-with-appsody-collections)
     - [Stacks](#stacks)
       - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
