@@ -29,8 +29,13 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Looking Inside the Container](#looking-inside-the-container)
     - [Viewing Application Metrics](#viewing-application-metrics)
     - [Running Load Tests](#running-load-tests)
-- [Start postgresql](#start-postgresql)
-      - [Further reading: Development versus production behaviour](#further-reading-development-versus-production-behaviour)
+  - [Working with Appsody Collections](#working-with-appsody-collections)
+    - [Stacks](#stacks)
+      - [Collection Scenario 1: Update the release of Open Liberty in the stack](#collection-scenario-1-update-the-release-of-open-liberty-in-the-stack)
+      - [Collection Scenario 2: Custom application templates](#collection-scenario-2-custom-application-template)
+    - [Build/CD](#buildcd)
+      - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
+      - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
 
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
