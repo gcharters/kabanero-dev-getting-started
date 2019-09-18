@@ -3,6 +3,7 @@
 original_dir=$PWD
 
 set -e
+#set -x
 
 #
 # Execution parameters
@@ -116,7 +117,17 @@ function cacheStacks {
     ./ci/build.sh . experimental/java-microprofile-dev-mode
 
     [[ $(appsody list | grep ${appsody_repo}) ]] && appsody repo remove ${appsody_repo}
-    appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
+    if [ ${cygwin} -eq 1 ]; then 
+        win_assets_dir=$(echo "${workshop_dir}/stacks/ci/assets" | sed "s|/cygdrive/c|c:|")
+        cmd /c "appsody repo add ${appsody_repo} file:///${win_assets_dir}/experimental-index-local.yaml"
+    else
+        appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
+    fi
+
+    if [ ${cygwin} -eq 1 ]; then 
+        cd ${original_dir}
+        return
+    fi
 
     echo
     echo "INFO: Prime cache for build and run"
@@ -124,7 +135,11 @@ function cacheStacks {
     rm -rf ${app_dir}
     mkdir -p ${app_dir}
     cd ${app_dir}
-    appsody init ${appsody_repo}/java-microprofile-dev-mode
+    if [ ${cygwin} -eq 1 ]; then 
+        cmd /c "appsody init ${appsody_repo}/java-microprofile-dev-mode"
+    else
+        appsody init ${appsody_repo}/java-microprofile-dev-mode
+    fi
     appsody build
     (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
     appsody stop --name workshop_prep_container
@@ -165,6 +180,24 @@ function checksPrereqs {
         prereqFailed=1
     else
         echo "INFO: git CLI installed: $(git version)"
+    fi
+
+    python3PrereqFailed=0
+    which python3 &> /dev/null || python3PrereqFailed=1
+    if [ ${python3PrereqFailed} -eq 1 ]; then
+        echo "ERROR: python3 cannot be found."
+        prereqFailed=1
+    else
+        echo "INFO: python3 CLI installed: $(python3 --version)"
+    fi
+
+    pipPrereqFailed=0
+    which pip &> /dev/null || pipPrereqFailed=1
+    if [ ${pipPrereqFailed} -eq 1 ]; then
+        echo "ERROR: pip cannot be found."
+        prereqFailed=1
+    else
+        echo "INFO: pip CLI installed: $(pip -V)"
     fi
 
     dockerPrereqFailed=0
@@ -278,7 +311,7 @@ if [ ${result} -eq 0 ]; then
     result=$?
 fi
 
-if [ ${cygwin} -eq 0 ] && [ ${result} -eq 0 ]; then
+if [ ${result} -eq 0 ]; then
     echo
     cacheStacks
     result=$?
