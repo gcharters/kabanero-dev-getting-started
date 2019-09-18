@@ -18,7 +18,7 @@ Assuming the creation of a new user does not violate your organization policies,
 2. Grant that new user full permissions to the folders to be mounted by Appsody into a container. You could use the "Security" tab for each folder properties in the File Explorer, but the quickers and simplest mechanism is to open a "Command Prompt" and issue the following commands:
 
 ```
-mkdir %USERPROFILE%\.m2
+mkdir %USERPROFILE%\.m2\repository
 mkdir %USERPROFILE%\.appsody
 mkdir %USERPROFILE%\workspace\kabanero-workshop
 
