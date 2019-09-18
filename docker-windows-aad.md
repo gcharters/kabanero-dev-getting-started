@@ -4,7 +4,7 @@ Docker Desktop on Windows requires access to the computer's filesystems in order
 
 Appsody relies on the mounted hosted volumes to expedite the startup of applications under development, so that it is imperative that Docker Desktop be configured to access the shared drive containing the user's home directory and that the user associated with the shared drive have the Windows "Full Control" permission on mounted directories.
 
-In most cases, it is sufficient to configure Docker with the same user as the the user developing applications with Appsody.
+In most cases, it is sufficient to configure Docker with the same user as the user developing applications with Appsody.
 
 However, for users of Windows 10 Enterprise secured with Azure Active Directory (AAD), the AAD user does not reside in the local host and may not be accepted in the "Shared Drives" tab of the Docker Desktop Settings page, specially if the organization has configured AAD to only issue PIN codes instead of user passwords.
 
@@ -19,7 +19,7 @@ Assuming the creation of a new user does not violate your organization policies,
 
     <img src="images/docker-windows-ad-share-drive.png">
 
-2. Grant that new user full permissions to the folders to be mounted by Appsody into a container. You could use the "Security" tab for each folder properties in the File Explorer, but the quickest and simplest mechanism is to open a "Command Prompt" and issue the following commands:
+2. Grant that new user the "Full Control" permission to the folders to be mounted by Appsody into a container. You could use the "Security" tab for each folder properties in the File Explorer application, but the quickest and simplest mechanism is to open a "Command Prompt" and issue the following commands:
 
     ```
     mkdir %USERPROFILE%\.m2\repository
@@ -38,7 +38,7 @@ Assuming the creation of a new user does not violate your organization policies,
 
     Repeat the `mkdir` and `icacls` commands for any other directory where you are about to create a new Appsody project. If you plan on creating multiple projects, you can also target a parent directory for those future project directories, so that you do not have to repeat the commands for each new Appsody project directory.
 
-    Since the parameters for `icacls` specify a recursive authorization, granting the permission directly to the `%USERPROFILE%` directory could be faster and simpler, but the instructions in this page prioritized the reduction in the surface area of the workaround.
+    Since the parameters for `icacls` specify a recursive authorization, granting the permission directly to the `%USERPROFILE%` directory could be faster and simpler, but the instructions in this page prioritized minimal impact for the workaround.
 
 ## Removing the workaround
 

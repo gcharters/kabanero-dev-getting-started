@@ -124,31 +124,29 @@ function cacheStacks {
         appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
     fi
 
-    if [ ${cygwin} -eq 1 ]; then 
-        cd ${original_dir}
-        return
-    fi
+    if [ ${cygwin} -eq 0 ]; then 
+        echo
+        echo "INFO: Prime cache for build and run"
+        echo        
+        rm -rf ${app_dir}
+        mkdir -p ${app_dir}
+        cd ${app_dir}
+        if [ ${cygwin} -eq 1 ]; then 
+            cmd /c "appsody init ${appsody_repo}/java-microprofile-dev-mode"
+        else
+            appsody init ${appsody_repo}/java-microprofile-dev-mode
+        fi
+        appsody build
+        (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
+        appsody stop --name workshop_prep_container
 
-    echo
-    echo "INFO: Prime cache for build and run"
-    echo        
-    rm -rf ${app_dir}
-    mkdir -p ${app_dir}
-    cd ${app_dir}
-    if [ ${cygwin} -eq 1 ]; then 
-        cmd /c "appsody init ${appsody_repo}/java-microprofile-dev-mode"
-    else
-        appsody init ${appsody_repo}/java-microprofile-dev-mode
+        docker rmi ${app_name}:latest
+
+        rm -rf ${app_dir}
     fi
-    appsody build
-    (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
-    appsody stop --name workshop_prep_container
 
     echo "INFO: Clearing all temporary content"
     appsody repo remove ${appsody_repo}
-    docker rmi ${app_name}:latest
-
-    rm -rf ${app_dir}
 
     cd ${original_dir}
 }
