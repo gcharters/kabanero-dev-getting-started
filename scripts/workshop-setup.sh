@@ -124,26 +124,34 @@ function cacheStacks {
         appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
     fi
 
-    if [ ${cygwin} -eq 0 ]; then 
-        echo
-        echo "INFO: Prime cache for build and run"
-        echo        
-        rm -rf ${app_dir}
+    echo
+    echo "INFO: Prime cache for appsody build"
+    echo        
+    rm -rf ${app_dir}
+    
+
+    if [ ${cygwin} -eq 1 ]; then 
+        # On Windows, the folder needs to be created
+        # by Windows in order to ensure proper inheritance
+        # of parent folder permissions
+        cd ${workshop_dir}
+        cmd /c "mkdir ${app_name}"
+    else
         mkdir -p ${app_dir}
-        cd ${app_dir}
-        if [ ${cygwin} -eq 1 ]; then 
-            cmd /c "appsody init ${appsody_repo}/java-microprofile-dev-mode"
-        else
-            appsody init ${appsody_repo}/java-microprofile-dev-mode
-        fi
-        appsody build
-        (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
-        appsody stop --name workshop_prep_container
-
-        docker rmi ${app_name}:latest
-
-        rm -rf ${app_dir}
     fi
+
+    cd ${app_dir}
+    appsody init ${appsody_repo}/java-microprofile-dev-mode
+    appsody build
+
+    echo
+    echo "INFO: Prime cache for appsody run"
+    echo        
+    (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
+    appsody stop --name workshop_prep_container
+
+    rm -rf ${app_dir}
+    docker rmi ${app_name}:latest
 
     echo "INFO: Clearing all temporary content"
     appsody repo remove ${appsody_repo}
@@ -330,7 +338,23 @@ chmod u+x "${env_file}"
 echo
 echo "INFO: Workshop preparation ready at ${workshop_dir}"
 echo
-echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
+if [ ${cygwin} -eq 1 ]; then 
+    env_win_file="${workshop_dir}/env.bat"
+    workshop_win_dir=$(echo ${workshop_dir} | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g")
+    cat > "${env_win_file}" << EOF
+set CODEWIND_INDEX=true
+set WORKSHOP_DIR=${workshop_win_dir}
+set workshop_dir=${workshop_win_dir}
+set workshop_url_dir=$(echo "${workshop_dir}" | sed "s|/cygdrive/\([a-z]\)|\1:|")
+EOF
+
+    echo "INFO: Execute the following line in Windows Command Prompt to configure environment variables referenced in workshop instructions:"
+    echo "${env_win_file}" | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g"
+    echo
+    echo "INFO: Execute the following line in Cygwin shells to configure environment variables referenced in workshop instructions:"
+else
+    echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
+fi
 echo "eval \$(cat ${workshop_dir}/env.sh)"
 echo
 
