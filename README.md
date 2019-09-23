@@ -56,7 +56,7 @@ For all users, you need to install the following pre-requisites to complete this
 For **Windows users** only: 
 * Due to the Docker Desktop dependency, this workshop **requires** Windows users to have either a **Windows 10 Professional** or **Windows 10 Enterprise** installation.
 * Make sure to read and **execute the instructions** in the [Special notes about Docker Desktop on Windows 10](docker-windows-aad.md) to ensure your Docker installation can successfully write content to volumes mounted into containers.
-* Install [Cygwin](https://www.cygwin.com/). Make sure to also include the non-default "python3" (this workshop was tested with version 3.6.8) and "python36-setup" packages. This dependency is related to the scenarios for Kabanero solution architects and not required for regular application development ([github issue #54](https://github.com/appsody/appsody/issues/45) will soon remove the dependency on cygwin and python packages).
+* Install [Cygwin](https://www.cygwin.com/). Make sure to also include the non-default "python3" (this workshop was tested with version 3.6.8) and "python36-setup" packages, then issue `easy_install-3.6 pip` to get `pip` installed. These dependencies are related to the scenarios for Kabanero solution architects and not required for regular application development ([github issue #54](https://github.com/appsody/appsody/issues/45) will soon remove the dependencies on cygwin and python packages).
 * Ensure your Cygwin home directory **matches your Windows home directory**, as described in [this blog entry](https://ryanharrison.co.uk/2015/12/01/cygwin-change-home-directory.html).
 * The workshop content has not been validated against the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl).
 
