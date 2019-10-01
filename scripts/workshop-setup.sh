@@ -197,13 +197,17 @@ function checksPrereqs {
         echo "INFO: python3 CLI installed: $(python3 --version)"
     fi
 
+    # 
+    # checking for pip3 version or if they have an 
+    # alias setup for pip3 as pip 
+    #
     pipPrereqFailed=0
-    which pip &> /dev/null || pipPrereqFailed=1
+    (pip3 -V || pip -V) &> /dev/null || pipPrereqFailed=1
     if [ ${pipPrereqFailed} -eq 1 ]; then
-        echo "ERROR: pip cannot be found."
+        echo "ERROR: pip or pip3 cannot be found."
         prereqFailed=1
     else
-        echo "INFO: pip CLI installed: $(pip -V)"
+        echo "INFO: pip or pip3 CLI installed: $(pip -V)"
     fi
 
     dockerPrereqFailed=0
