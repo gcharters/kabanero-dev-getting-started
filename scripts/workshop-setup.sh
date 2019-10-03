@@ -3,7 +3,7 @@
 original_dir=$PWD
 
 set -e
-set -x
+set +x
 
 #
 # Execution parameters
@@ -11,7 +11,6 @@ set -x
 
 appsody_repo=workshop-prep
 workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
-stacks_dir=${workshop_dir}/stacks
 workshop_collection=java
 
 #
@@ -64,9 +63,9 @@ function cacheDockerImages {
     mkdir -p ${app_temp_dir}
     cd ${app_temp_dir}
     if [ ${cygwin} -eq 1 ]; then 
-        cmd /c 'appsody init java-microprofile'
+        cmd /c 'appsody init appsodyhub/java-microprofile'
     else
-        appsody init java-microprofile
+        appsody init appsodyhub/java-microprofile
     fi
     opendjk_local_docker_context_dir="${app_temp_dir}/tmp"
     if [ ${cygwin} -eq 1 ]; then 
@@ -75,7 +74,7 @@ function cacheDockerImages {
         appsody extract --target-dir "${opendjk_local_docker_context_dir}"
     fi
 
-    cp "${workshop_dir}/stacks/${collection_path}/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
+    cp "${workshop_dir}/${stacks_subdir}/${collection_path}/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
 
     opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
     cat > "${opendjk_local_dockerfile}" <<EOF
@@ -126,14 +125,25 @@ function cacheStacks {
 
     [ ${is_java} -eq 1 ] && mkdir -p ~/.m2
     cd ${stacks_dir}
-    ./ci/build.sh . ${collection_path}
+    if [ ${is_java} -eq 1 ]; then
+        ./ci/build.sh . ${collection_path}
+    else
+        if [ ${is_nodeexpress} -eq 1 ]; then
+            rm -rf "${stacks_dir}/incubator/java-microprofile"
+            rm -rf "${stacks_dir}/incubator/java-spring-boot2"
+            rm -rf "${stacks_dir}/incubator/nodejs"
+            rm -rf "${stacks_dir}/incubator/nodejs-loopback"
+        fi
+        IMAGE_REGISTRY_ORG=kabanero CODEWIND_INDEX=true ./ci/build.sh
+        return
+    fi
 
     [[ $(appsody list | grep ${appsody_repo}) ]] && appsody repo remove ${appsody_repo}
     if [ ${cygwin} -eq 1 ]; then 
-        win_assets_dir=$(echo "${workshop_dir}/stacks/ci/assets" | sed "s|/cygdrive/c|c:|")
-        cmd /c "appsody repo add ${appsody_repo} file:///${win_assets_dir}/${collection_dir}-index-local.yaml"
+        win_assets_dir=$(echo "${workshop_dir}/${stacks_subdir}/ci/assets" | sed "s|/cygdrive/c|c:|")
+        cmd /c "appsody repo add ${appsody_repo} file:///${win_assets_dir}/${collection_index}-index-local.yaml"
     else
-        appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/${collection_dir}-index-local.yaml
+        appsody repo add ${appsody_repo} file://${workshop_dir}/${stacks_subdir}/ci/assets/${collection_index}-index-local.yaml
     fi
 
     echo
@@ -348,23 +358,29 @@ echo "INFO: Workshop preparation starting..."
 echo
 
 is_java=1
+is_nodeexpress=0
 app_name=java-example
 app_dir=${workshop_dir}/${app_name}
+stacks_subdir=stacks
+stacks_dir=${workshop_dir}/${stacks_subdir}
 git_repo_stacks=https://github.com/gcharters/stacks.git
 collection_name=java-microprofile-dev-mode
-collection_dir=experimental
-collection_path=${collection_dir}/${collection_name}
+collection_index=experimental
+collection_path=${collection_index}/${collection_name}
 case ${workshop_collection} in
   java) 
   ;;
   nodejs)
   is_java=0
+  is_nodeexpress=1
   app_name=nodejs-example
   app_dir=${workshop_dir}/${app_name}
-  git_repo_stacks=https://github.com/kabanero-io/collections/stacks.git
+  stacks_subdir=collections
+  stacks_dir=${workshop_dir}/${stacks_subdir}
+  git_repo_stacks=https://github.com/kabanero-io/collections.git
   collection_name=nodejs-express
-  collection_dir=incubator
-  collection_path=${collection_dir}/${collection_name}
+  collection_index=kabanero
+  collection_path=incubator/${collection_name}
   ;;
   *)
   echo "INFO: No workshop collection specified, defaulting to ${workshop_collection}"
@@ -392,6 +408,7 @@ fi
 #
 env_file="${workshop_dir}/env.sh"
 cat > "${env_file}" << EOF
+export IMAGE_REGISTRY_ORG=kabanero
 export CODEWIND_INDEX=true
 export WORKSHOP_DIR=${workshop_dir}
 export workshop_dir=${workshop_dir}
@@ -405,6 +422,7 @@ if [ ${cygwin} -eq 1 ]; then
     env_win_file="${workshop_dir}/env.bat"
     workshop_win_dir=$(echo ${workshop_dir} | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g")
     cat > "${env_win_file}" << EOF
+set IMAGE_REGISTRY_ORG=kabanero
 set CODEWIND_INDEX=true
 set WORKSHOP_DIR=${workshop_win_dir}
 set workshop_dir=${workshop_win_dir}
