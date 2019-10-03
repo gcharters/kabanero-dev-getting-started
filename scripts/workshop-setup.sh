@@ -3,19 +3,31 @@
 original_dir=$PWD
 
 set -e
-#set -x
+set -x
 
 #
 # Execution parameters
 #
 
 appsody_repo=workshop-prep
-app_name=java-example
-
 workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
-# workshop_dir=`mktemp /tmp/wk.XXXXXX` || exit 1
-app_dir=${workshop_dir}/${app_name}
 stacks_dir=${workshop_dir}/stacks
+workshop_collection=java
+
+#
+# Usage statement
+#
+function usage() {
+    echo "Prepares the workshop environment."
+    echo ""
+    echo "Usage: $scriptname [OPTIONS]...[ARGS]"
+    echo
+    echo "  -l  | --language   Workshop programming language. Accepted values are \"java\" and \"nodejs\""
+    echo "                     The default lnaguage is ${workshop_collection}."
+    echo ""
+    echo "  -v  | --verbose    Prints extra information about each command."
+    echo "  -h  | --help       Output this usage statement."
+}
 
 
 #
@@ -25,7 +37,7 @@ function gitCloneStack {
     if [ ! -e "${stacks_dir}" ]; then
         mkdir -p ${workshop_dir}
         cd "${workshop_dir}"
-        git clone https://github.com/gcharters/stacks.git
+        git clone ${git_repo_stacks}
     else
         cd "${stacks_dir}"
         git pull
@@ -63,7 +75,7 @@ function cacheDockerImages {
         appsody extract --target-dir "${opendjk_local_docker_context_dir}"
     fi
 
-    cp "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
+    cp "${workshop_dir}/stacks/${collection_path}/image/project/pom-dev.xml" "${opendjk_local_docker_context_dir}"
 
     opendjk_local_dockerfile="${opendjk_local_docker_context_dir}/Dockerfile"
     cat > "${opendjk_local_dockerfile}" <<EOF
@@ -112,38 +124,46 @@ function cacheStacks {
     echo
     gitCloneStack
 
-    mkdir -p ~/.m2
+    [ ${is_java} -eq 1 ] && mkdir -p ~/.m2
     cd ${stacks_dir}
-    ./ci/build.sh . experimental/java-microprofile-dev-mode
+    ./ci/build.sh . ${collection_path}
 
     [[ $(appsody list | grep ${appsody_repo}) ]] && appsody repo remove ${appsody_repo}
     if [ ${cygwin} -eq 1 ]; then 
         win_assets_dir=$(echo "${workshop_dir}/stacks/ci/assets" | sed "s|/cygdrive/c|c:|")
-        cmd /c "appsody repo add ${appsody_repo} file:///${win_assets_dir}/experimental-index-local.yaml"
+        cmd /c "appsody repo add ${appsody_repo} file:///${win_assets_dir}/${collection_dir}-index-local.yaml"
     else
-        appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
+        appsody repo add ${appsody_repo} file://${workshop_dir}/stacks/ci/assets/${collection_dir}-index-local.yaml
     fi
 
-    if [ ${cygwin} -eq 0 ]; then 
-        echo
-        echo "INFO: Prime cache for build and run"
-        echo        
-        rm -rf ${app_dir}
+    echo
+    echo "INFO: Prime cache for appsody build"
+    echo        
+    rm -rf ${app_dir}
+    
+
+    if [ ${cygwin} -eq 1 ]; then 
+        # On Windows, the folder needs to be created
+        # by Windows in order to ensure proper inheritance
+        # of parent folder permissions
+        cd ${workshop_dir}
+        cmd /c "mkdir ${app_name}"
+    else
         mkdir -p ${app_dir}
-        cd ${app_dir}
-        if [ ${cygwin} -eq 1 ]; then 
-            cmd /c "appsody init ${appsody_repo}/java-microprofile-dev-mode"
-        else
-            appsody init ${appsody_repo}/java-microprofile-dev-mode
-        fi
-        appsody build
-        (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
-        appsody stop --name workshop_prep_container
-
-        docker rmi ${app_name}:latest
-
-        rm -rf ${app_dir}
     fi
+
+    cd ${app_dir}
+    appsody init ${appsody_repo}/${collection_name}
+    appsody build
+
+    echo
+    echo "INFO: Prime cache for appsody run"
+    echo        
+    (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
+    appsody stop --name workshop_prep_container
+
+    rm -rf ${app_dir}
+    docker rmi ${app_name}:latest
 
     echo "INFO: Clearing all temporary content"
     appsody repo remove ${appsody_repo}
@@ -189,13 +209,17 @@ function checksPrereqs {
         echo "INFO: python3 CLI installed: $(python3 --version)"
     fi
 
+    # 
+    # checking for pip3 version or if they have an 
+    # alias setup for pip3 as pip 
+    #
     pipPrereqFailed=0
-    which pip &> /dev/null || pipPrereqFailed=1
+    pip3 -V &> /dev/null || pipPrereqFailed=1
     if [ ${pipPrereqFailed} -eq 1 ]; then
-        echo "ERROR: pip cannot be found."
+        echo "ERROR: pip3 cannot be found."
         prereqFailed=1
     else
-        echo "INFO: pip CLI installed: $(pip -V)"
+        echo "INFO: pip3 CLI installed: $(pip3 -V)"
     fi
 
     dockerPrereqFailed=0
@@ -296,14 +320,61 @@ case "`uname`" in
 esac
 
 
+while [[ $# > 0 ]]
+do
+key="$1"
+shift
+case $key in
+    -l|--language)
+    workshop_collection=$1
+    shift
+    ;;
+    -h|--help)
+    usage
+    exit
+    ;;
+    -v|--verbose)
+    verbose=1
+    ;;
+    *)
+    echo "Unrecognized parameter: $key"
+    usage
+    exit 1
+esac
+done
+
 echo
 echo "INFO: Workshop preparation starting..."
 echo
 
-checksPrereqs
+is_java=1
+app_name=java-example
+app_dir=${workshop_dir}/${app_name}
+git_repo_stacks=https://github.com/gcharters/stacks.git
+collection_name=java-microprofile-dev-mode
+collection_dir=experimental
+collection_path=${collection_dir}/${collection_name}
+case ${workshop_collection} in
+  java) 
+  ;;
+  nodejs)
+  is_java=0
+  app_name=nodejs-example
+  app_dir=${workshop_dir}/${app_name}
+  git_repo_stacks=https://github.com/kabanero-io/collections/stacks.git
+  collection_name=nodejs-express
+  collection_dir=incubator
+  collection_path=${collection_dir}/${collection_name}
+  ;;
+  *)
+  echo "INFO: No workshop collection specified, defaulting to ${workshop_collection}"
+esac
+
+
+#checksPrereqs
 result=$?
 
-if [ ${result} -eq 0 ]; then
+if [ ${is_java} -eq 1 ] && [ ${result} -eq 0 ]; then
     echo
     cacheDockerImages
     result=$?
@@ -330,7 +401,23 @@ chmod u+x "${env_file}"
 echo
 echo "INFO: Workshop preparation ready at ${workshop_dir}"
 echo
-echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
+if [ ${cygwin} -eq 1 ]; then 
+    env_win_file="${workshop_dir}/env.bat"
+    workshop_win_dir=$(echo ${workshop_dir} | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g")
+    cat > "${env_win_file}" << EOF
+set CODEWIND_INDEX=true
+set WORKSHOP_DIR=${workshop_win_dir}
+set workshop_dir=${workshop_win_dir}
+set workshop_url_dir=$(echo "${workshop_dir}" | sed "s|/cygdrive/\([a-z]\)|\1:|")
+EOF
+
+    echo "INFO: Execute the following line in Windows Command Prompt to configure environment variables referenced in workshop instructions:"
+    echo "${env_win_file}" | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g"
+    echo
+    echo "INFO: Execute the following line in Cygwin shells to configure environment variables referenced in workshop instructions:"
+else
+    echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
+fi
 echo "eval \$(cat ${workshop_dir}/env.sh)"
 echo
 
