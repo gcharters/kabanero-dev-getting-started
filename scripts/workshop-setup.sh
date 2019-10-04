@@ -257,26 +257,28 @@ function checksPrereqs {
         echo "INFO: git CLI installed: $(git version)"
     fi
 
-    python3PrereqFailed=0
-    which python3 &> /dev/null || python3PrereqFailed=1
-    if [ ${python3PrereqFailed} -eq 1 ]; then
-        echo "ERROR: python3 cannot be found."
-        prereqFailed=1
-    else
-        echo "INFO: python3 CLI installed: $(python3 --version)"
-    fi
+    if [ ${is_java} -eq 1 ]; then
+        python3PrereqFailed=0
+        which python3 &> /dev/null || python3PrereqFailed=1
+        if [ ${python3PrereqFailed} -eq 1 ]; then
+            echo "ERROR: python3 cannot be found."
+            prereqFailed=1
+        else
+            echo "INFO: python3 CLI installed: $(python3 --version)"
+        fi
 
-    # 
-    # checking for pip3 version or if they have an 
-    # alias setup for pip3 as pip 
-    #
-    pipPrereqFailed=0
-    pip3 -V &> /dev/null || pipPrereqFailed=1
-    if [ ${pipPrereqFailed} -eq 1 ]; then
-        echo "ERROR: pip3 cannot be found."
-        prereqFailed=1
-    else
-        echo "INFO: pip3 CLI installed: $(pip3 -V)"
+        # 
+        # checking for pip3 version or if they have an 
+        # alias setup for pip3 as pip 
+        #
+        pipPrereqFailed=0
+        pip3 -V &> /dev/null || pipPrereqFailed=1
+        if [ ${pipPrereqFailed} -eq 1 ]; then
+            echo "ERROR: pip3 cannot be found."
+            prereqFailed=1
+        else
+            echo "INFO: pip3 CLI installed: $(pip3 -V)"
+        fi
     fi
 
     dockerPrereqFailed=0
@@ -409,7 +411,7 @@ echo "INFO: Workshop preparation starting..."
 echo
 
 is_java=1
-is_nodeexpress=0
+is_node=0
 app_name=java-example
 app_dir=${workshop_dir}/${app_name}
 stacks_subdir=stacks
@@ -423,7 +425,7 @@ case ${workshop_collection} in
   ;;
   nodejs)
   is_java=0
-  is_nodeexpress=1
+  is_node=1
   app_name=nodejs-example
   app_dir=${workshop_dir}/${app_name}
   stacks_subdir=collections
