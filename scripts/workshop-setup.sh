@@ -21,8 +21,11 @@ function usage() {
     echo ""
     echo "Usage: $scriptname [OPTIONS]...[ARGS]"
     echo
+    echo "  -p  | --check-prereqs"
+    echo "                     Verifies the presence and correct versions of workshop"
+    echo "                     prerequisites."
     echo "  -l  | --language   Workshop programming language. Accepted values are \"java\" and \"nodejs\""
-    echo "                     The default lnaguage is ${workshop_collection}."
+    echo "                     The default programming language is ${workshop_collection}."
     echo ""
     echo "  -v  | --verbose    Prints extra information about each command."
     echo "  -h  | --help       Output this usage statement."
@@ -126,15 +129,11 @@ function cacheStacks {
     [ ${is_java} -eq 1 ] && mkdir -p ~/.m2
     cd ${stacks_dir}
     if [ ${is_java} -eq 1 ]; then
-        ./ci/build.sh . ${collection_path}
+        CODEWIND_INDEX=true ./ci/build.sh . ${collection_path}
     else
-        if [ ${is_nodeexpress} -eq 1 ]; then
-            rm -rf "${stacks_dir}/incubator/java-microprofile"
-            rm -rf "${stacks_dir}/incubator/java-spring-boot2"
-            rm -rf "${stacks_dir}/incubator/nodejs"
-            rm -rf "${stacks_dir}/incubator/nodejs-loopback"
-        fi
-        IMAGE_REGISTRY_ORG=kabanero CODEWIND_INDEX=true ./ci/build.sh
+        cd ${collection_path}
+        [[ $(appsody list | grep dev-local) ]] && appsody repo remove dev-local
+        IMAGE_REGISTRY_ORG=kabanero CODEWIND_INDEX=true appsody stack package
         return
     fi
 
@@ -168,8 +167,10 @@ function cacheStacks {
 
     echo
     echo "INFO: Prime cache for appsody run"
-    echo        
-    (appsody run --name workshop_prep_container) & sleep 180 ; kill -9 $!
+    echo
+    sleepTime=30
+    [ ${is_java} -eq 1 ] && sleepTime=180
+    (appsody run --name workshop_prep_container) & sleep ${sleepTime} ; kill -9 $!
     appsody stop --name workshop_prep_container
 
     rm -rf ${app_dir}
@@ -179,6 +180,41 @@ function cacheStacks {
     appsody repo remove ${appsody_repo}
 
     cd ${original_dir}
+}
+
+
+#
+# https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+#
+function vercomp () {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
 }
 
 
@@ -199,6 +235,17 @@ function checksPrereqs {
         prereqFailed=1
     else
         echo "INFO: appsody CLI installed: $(appsody version)"
+    fi
+
+    appsodyVersionPrereqFailed=0
+    appsody_min_version="0.4.6"
+    appsody_version=$(appsody version | cut -d " " -f 2) 
+    $(vercomp ${appsody_version} ${appsody_min_version}) || appsodyVersionPrereqFailed=$?
+    if [ ${appsodyVersionPrereqFailed} -eq 2 ]; then
+        echo "ERROR: appsody CLI version must be ${appsody_min_version} or higher."
+        prereqFailed=1
+    else
+        echo "INFO: appsody CLI version [${appsody_version}] meets minimum requirements."
     fi
 
     gitPrereqFailed=0
@@ -330,11 +377,15 @@ case "`uname`" in
 esac
 
 
+check=0
 while [[ $# > 0 ]]
 do
 key="$1"
 shift
 case $key in
+    -p|--check-prereqs)
+    check=1
+    ;;
     -l|--language)
     workshop_collection=$1
     shift
@@ -387,7 +438,7 @@ case ${workshop_collection} in
 esac
 
 
-#checksPrereqs
+[ ${check} -eq 1 ] && checksPrereqs
 result=$?
 
 if [ ${is_java} -eq 1 ] && [ ${result} -eq 0 ]; then
