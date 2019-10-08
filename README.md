@@ -43,13 +43,6 @@ Before you get started, there are a number of pre-reqs you'll need to install.  
 
 ### Pre-requisites
 
-For **Windows users** only: 
-* Due to the Docker Desktop dependency mentioned below, this workshop **requires** Windows users to have either a **Windows 10 Pro** or **Windows 10 Enterprise** installation.
-* Make sure to read and **execute the instructions** in the [Special notes about Docker Desktop on Windows 10](docker-windows-aad.md) to ensure your Docker installation can successfully write content to volumes mounted into Docker containers.
-* Whereas the developer experience for Kabanero supports Windows users, this workshop also covers the experience for Kabanero architects, which depends on a Linux shell environment. The instructions for this workshop have been tested with [Cygwin](https://www.cygwin.com/).
-* Ensure your Cygwin home directory **matches your Windows home directory**, as described in [this blog entry](https://ryanharrison.co.uk/2015/12/01/cygwin-change-home-directory.html).
-* The workshop content has not been validated against the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl) . The Docker CLI running inside WSL requires special settings to communicate with Docker Desktop running on Windows, and that configuration is outside the scope of the validated instructions.
-
 For all users, you need to install the following pre-requisites to complete this tutorial:
 
 * [A Java 8 JDK Installation](https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=openj9)
@@ -59,9 +52,18 @@ For all users, you need to install the following pre-requisites to complete this
   * [MacOS Docker Installation](https://docs.docker.com/docker-for-mac/)
 * [Visual Studio Code](https://code.visualstudio.com/)
 
+
+For **Windows users** only: 
+* Due to the Docker Desktop dependency, this workshop **requires** Windows users to have either a **Windows 10 Professional** or **Windows 10 Enterprise** installation.
+* Make sure to read and **execute the instructions** in the [Special notes about Docker Desktop on Windows 10](docker-windows-aad.md) to ensure your Docker installation can successfully write content to volumes mounted into containers.
+* Install [Cygwin](https://www.cygwin.com/). Make sure to also include the non-default "python3" (this workshop was tested with version 3.6.8) and "python36-setup" packages, then issue `easy_install-3.6 pip` to get `pip` installed. These dependencies are related to the scenarios for Kabanero solution architects and not required for regular application development ([github issue #54](https://github.com/appsody/appsody/issues/45) will soon remove the dependencies on cygwin and python packages).
+* Ensure your Cygwin home directory **matches your Windows home directory**, as described in [this blog entry](https://ryanharrison.co.uk/2015/12/01/cygwin-change-home-directory.html).
+* The workshop content has not been validated against the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl).
+
+
 ### Enable Kubernetes
 
-You will need to enable Kubernetes as this is disabled by default in Docker Desktop. This can be done by going to **Preferences**, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
+You will need to enable Kubernetes as this is disabled by default in Docker Desktop. This can be done by going to **Preferences** on MacOS or **Settings** on Windows, navigating to the **Kubernetes** tab, and checking **Enable Kubernetes**.
 
 ### Visual Studio Code Kabanero Setup
 
@@ -84,13 +86,15 @@ Depending on your operating system, the installation process for the **Appsody C
 Verify that the CLI tool is installed correctly by executing the following into your terminal:
 
 ```
-$ appsody
+$ appsody list
 ```
 
 #### Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional
 While this is optional, it is recommended. Rather than having **Appsody CLI** projects stored separately to those you may create in an editor such as **Visual Studio Code** or **Eclipse**, updating the **Appsody** configuration file will enable you to work on your projects across both the CLI and editor.
 
-To share the Appsody configuration, follow the instructions at [this repository](https://github.com/kabanero-io/appsodyExtension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
+To share the Appsody configuration, follow the instructions at [this repository](https://github.com/eclipse/codewind-appsody-extension#optional-using-the-same-appsody-configuration-between-local-cli-and-codewind).
+
+
 
 ### Pre-requisite checks and caching of large images
 
@@ -98,12 +102,8 @@ This step will ensure your environment has all the prerequisites installed and r
 
 In addition to checking prerequisites, this step will also cache large images into your local system. The cached content will save you valuable time at the beginning of the workshop.
 
-Linux Users:
-```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.1/workshop-setup.sh | bash
-```
+(Windows users should execute it from a Cygwin shell) :
 
-Windows Users on a Cygwin shell:
 ```
 curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.2/workshop-setup.sh | bash
 ```
@@ -202,10 +202,18 @@ We're going to use a custom stack created for this workshop.  Anybody can write 
 
 As part of the setup for the workshop, you cloned a github repository and built a project that contained the new stack. Let's go to the output of that build:
 
+Linux users:
 ```
 workshop_dir=$(echo ~)"/workspace/kabanero-workshop"
 cd ${workshop_dir}/stacks/ci/assets
 ```
+
+Windows users:
+```
+set workshop_dir="%USERPROFILE%\workspace\kabanero-workshop"
+cd %workshop_dir%\stacks\ci\assets
+```
+
 
 If you list the contents of that directory, you should see something like this:
 
@@ -237,8 +245,15 @@ This contains the stack packages (.tar.gz files) and local/remote repository fil
 
 Let's add the local repository definition to the set of repositories that the Appsody CLI can use:
 
+Linux users:
 ```
 appsody repo add workshop file://${workshop_dir}/stacks/ci/assets/experimental-index-local.yaml
+```
+
+Windows users (note the reference to %workshop_url_dir%, set by env.bat)
+```
+%USERPROFILE%\workspace\kabanero-workshop\env.bat
+appsody repo add workshop file:///%workshop_url_dir%/stacks/ci/assets/experimental-index-local.yaml
 ```
 
 Check the repository has been added:
@@ -284,12 +299,19 @@ We're now ready to start creating applications using the new Appsody stack.
 
 Make a directory to contain your project:
 
+Linux users:
 ```
 mkdir -p ~/workspace/kabanero-workshop/java-example
 cd ~/workspace/kabanero-workshop/java-example
 ```
 
-Create the new project.  This project will use the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
+Windows users:
+```
+mkdir %USERPROFILE%\workspace\kabanero-workshop\java-example
+cd %USERPROFILE%\workspace\kabanero-workshop\java-example
+```
+
+Create the new project.  This project will using the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
 
 ```
 appsody init workshop/java-microprofile-dev-mode
@@ -379,6 +401,12 @@ Save the file.  You'll see a message that `liberty:dev` mode does not handle `po
 A CWWKZ0001I: Application starter-app started in 9.393 seconds..
 ```
 
+Note for Windows users: Due to a known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705), containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to use a docker command to trigger the change:
+
+```
+docker exec -it java-example-dev sh -c "touch /project/user-app/pom.xml"
+```
+
 Let's now make a code change.  The Java MicroProfile stack we're using takes advantage of `liberty:dev` mode to dynamically update the running application without needing a lengthy maven rebuild. 
 
 First, navigate to the JAX-RS application endpoint to confirm that there are no JAX-RS resources available.  Open the following link in your browser:
@@ -420,6 +448,12 @@ You should see that upon saving the file the source is compiled and the applicat
 [Container] [INFO] [AUDIT   ] CWWKZ0003I: The application starter-app updated in 1.447 seconds.
 ```
 
+Note for Windows users: Due to a known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705), containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to use a docker command to trigger the change:
+
+```
+docker exec -it java-example-dev sh -c "find /project/user-app/src/main/java/dev/appsody/starter -exec touch {} \;"
+```
+
 Now if you browse http://localhost:9080/starter instead of the `HTTP 500` error you should see a `HTTP 404`.  The resource we just added is actually available at a location under `starter.  Browse the following URL to see the resource response:
 
 http://localhost:9080/starter/resource
@@ -428,8 +462,7 @@ You should see the response `StarterResource response`
 
 Try changing the message in `StarterResource.java` saving and refreshing the page.  You'll see it only takes a few seconds for the change to take effect.
 
-When you're done, type `Ctrl-C` to end the appsody run. 
-
+When you're done, type `Ctrl-C` to end the appsody run.
 
 
 ### Deploying to Kubernetes
@@ -578,32 +611,39 @@ replicaset.apps/appsody-operator-5bbbc784b7   1         1         1       6d21h
 What if you decide you want to see the Container and Kubernetes configuration that Appsody is using, or you want to take your project elsewhere?  You can do this as follows. Enter:
 
 ```
-appsody extract
+appsody extract --target-dir tmp-extract
 ```
 
 You should see output similar to:
 
 ```
-charters@Grahams-MBP-2 kabanero-workshop $ appsody extract
+charters@Grahams-MBP-2 kabanero-workshop $ appsody extract --target-dir tmp-extract
 Extracting project from development environment
 Running command: docker[pull gcharters/java-microprofile-dev-mode:0.2]
 [Warning] Docker image pull failed: exit status 1
 Using local cache for image gcharters/java-microprofile-dev-mode:0.2
 [Warning] The stack image does not contain APPSODY_PROJECT_DIR. Using /project
-Running command: docker[create --name kabanero-workshop-extract -v /Users/charters/.m2/repository:/root/.m2/repository -v /Users/charters/kabanero-workshop/.:/project/user-app gcharters/java-microprofile-dev-mode:0.2]
-Running command: docker[cp kabanero-workshop-extract:/project /Users/charters/.appsody/extract/kabanero-workshop]
-Running command: docker[rm kabanero-workshop-extract -f]
-Project extracted to /Users/charters/.appsody/extract/kabanero-workshop
+Running command: docker[create --name java-example-extract -v /Users/charters/.m2/repository:/root/.m2/repository -v /Users/charters/workspace/kabanero-workshop/java-example.:/project/user-app gcharters/java-microprofile-dev-mode:0.2]
+Running command: docker[cp java-example-extract:/project /Users/charters/workspace/kabanero-workshop/java-example/tmp-extract]
+Running command: docker[rm java-example-extract -f]
+Project extracted to /Users/charters/workspace/kabanero-workshop/java-example/tmp-extract
 ```
 
 Let's take a look at the extracted project:
 
+Linux users:
 ```
-cd ~/.appsody/extract/kabanero-workshop
+cd ~/workspace/kabanero-workshop/java-example/tmp-extract
 ls -al
 ```
 
-You should see the following:
+Windows users:
+```
+cd %USERPROFILE%\workspace\kabanero-workshop\java-example\tmp-extract
+dir
+```
+
+You should see output similar to the following:
 
 ```
 charters@Grahams-MBP-2 kabanero-workshop $ ls -al
@@ -646,13 +686,13 @@ Edit the following file:
 Add the following entry:
 
 ```json
-{
+[
   {
     "url": "https://github.com/gcharters/stacks/releases/download/java-microprofile-dev-mode-v0.2.10/experimental-index.json",
     "description": "Appsody Experimental"
   },
   ...
-}
+]
 ```
 
 This points to a json file that tells Codewind about the custom stack.
@@ -726,7 +766,14 @@ public class StarterResource {
 }
 ```
 
-Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser. Let's see this in action.
+Any changes you make to your code will automatically be built and re-deployed by **Codewind**, and viewed in your browser.
+
+For Windows users:
+
+- Due to the known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705), containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to execute a `touch` command on the file to trigger the recompilation.  Right-click the Codewind "kabanero-mp-project" and select "Open Container Shell", then type the following command into the shell: 
+
+    ```touch src/main/java/dev/appsody/starter/StarterResource.java```
+  
 
 If you still have the logs `OUTPUT` tab open you will see that the code is compiled and the application restarted. You should see messages like:
 
@@ -806,6 +853,8 @@ Let's do some development and degrade the performance of the services.  Update t
     }
   ```
 
+For Windows users: Repeat the same previous `touch` command inside the Terminal tab in order to trigger the compilation. Hint: Using the "up" arrow in the keyboard will recall previous commands, so you can simply recall the correct command and hit Enter instead of typing it again.
+
 In the performance dashboard, click `Run Load Test`, give the test another name, e.g. `Test 2`, and click `Run`.  When the tests complete, you should see results similar to the following:
 
 <img src="images/performance-test2.png" width="50%" height="50%">
@@ -818,8 +867,16 @@ We can see clearly from the chart that the response time has increased.  Revisit
 
 The project you created is a normal Appsody project and so can be worked with using the Appsody CLI. As per the Appsody part of this workshop, deploy the application to Kubernetes using:
 
+Linux users:
 ```
- $ appsody deploy
+cd ~/codewind-workspace/kabanero-mp-project
+appsody deploy
+```
+
+Windows users:
+```
+cd c:\codewind-workspace\kabanero-mp-project
+appsody deploy
 ```
 
 If this was successful, the output of this command should be:
@@ -865,7 +922,7 @@ The workshop will cover various aspects of the customization of an existing coll
 
 ### Stacks ###
 
-A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may  to specify different tuning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
+A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may specify different tuning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
 
 You can study the internal file structure of a stack in more detail [here](https://appsody.dev/docs/stacks/stack-structure).
 
@@ -893,14 +950,26 @@ In this stack, the [container image file](https://github.com/gcharters/stacks/bl
 ```
 
 You can now modify the Open Liberty version to 19.0.0.8, then use the `grep` command to inspect the change:
+
+MacOS users:
 ```
 sed -i "" "s|19.0.0.7|19.0.0.8|g" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
+```
 
+Windows users (rom Cygwin shell):
+```
+sed -i "s|19.0.0.7|19.0.0.8|g" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
+```
+
+
+All users:
+```
 grep "19.0.0" "${workshop_dir}/stacks/experimental/java-microprofile-dev-mode/image/project/pom.xml"
 ```
 
 With the version changed, we need to rebuild the stack before proceeding with the stack validation steps:
 
+(Windows users should execute the commands from a Cygwin shell)
 ```
 cd "${workshop_dir}/stacks"
 ./ci/build.sh . experimental/java-microprofile-dev-mode
@@ -908,8 +977,16 @@ cd "${workshop_dir}/stacks"
 
 Since this local stack build was registered as an Appsody repository in the first part of the workshop, there is no need to register it again. It is now time to verify the changes from the perspective of the application developer. We can go back to the original application directory and trigger another run, which will use the updated stack:
 
+Linux users:
 ```
 cd "${workshop_dir}/java-example"
+
+appsody run
+```
+
+Windows users:
+```
+cd "%workshop_dir%\java-example"
 
 appsody run
 ```
@@ -946,40 +1023,43 @@ Our second step is to instantiate a local PostgreSQL database. We will use a cus
 ```
 docker network create workshop_nw
 
-# Start postgresql
 docker run --rm -it --name workshop-postgres --hostname psqldb --network workshop_nw -e POSTGRES_PASSWORD=mysecretpassword -d postgres 
 ```
 
 Ensure the database container is running:
 
 ```
-docker ps | grep workshop-postgres
+docker ps
 
 b66c53a3be0f        postgres                                                  "docker-entrypoint.s…"   22 seconds ago      Up 21 seconds       5432/tcp                    workshop-postgres
 ```
 
 
-```
+Now we can create a new application, using the template containing the database resource:
 
+Linux users:
+```
 mkdir -p "${workshop_dir}/stacktest-db"
 cd "${workshop_dir}/stacktest-db"
+```
+
+Windows users:
+```
+mkdir -p "%workshop_dir%\stacktest-db"
+cd "%workshop_dir%\stacktest-db"
+```
+
+All users:
+```
 appsody init workshop/java-microprofile-dev-mode psqldb
 
 appsody run --network workshop_nw
 ```
 
-Wait for the application to complete its startup cycle and verify that the new endpoint is available:
+Wait for the application to complete its startup cycle and verify that the new endpoint is available, by opening the http://localhost:9080/starter/database/  URL in a web browser, where you should shee output like this:
 
 ```
-curl -s http://localhost:9080/starter/database/  | tr -s "," "\n"
-{"client.info.ApplicationName":"PostgreSQL JDBC Driver"
-"db.product.name":"PostgreSQL"
-"db.product.version":"11.5 (Debian 11.5-1.pgdg90+1)"
-"db.major.version":11
-"db.minor.version":5
-"db.driver.version":"42.2.6"
-"db.jdbc.major.version":4
-"db.jdbc.minor.version":2}
+{"client.info.ApplicationName":"PostgreSQL JDBC Driver","db.product.name":"PostgreSQL","db.product.version":"11.5 (Debian 11.5-1.pgdg90+1)","db.major.version":11,"db.minor.version":5,"db.driver.version":"42.2.6","db.jdbc.major.version":4,"db.jdbc.minor.version":2}
 ```
 
 End the application with `Ctrl+C`, stop the workshop-postgres container, and delete the custom network:
@@ -1021,6 +1101,7 @@ RUN mvn checkstyle:checkstyle install -DskipTests -Dcheckstyle.consoleOutput=tru
 
 With the change in place, we can rebuild the stack again:
 
+Windows users should execute the commands from a Cygwin shell:
 ```
 cd "${workshop_dir}/stacks"
 ./ci/build.sh . experimental/java-microprofile-dev-mode
@@ -1078,7 +1159,7 @@ That means application developers will see their next call to `appsody run` to a
 
 For this scenario, we want to modify the stack to actually break the build in case of problems with the static code analysis and tag the release as 0.3.1. We first replace all occurrences of 0.2.10 with 0.3.1:
 
-
+Windows users should execute the commands from a Cygwin shell:
 ```
 cd "${workshop_dir}/stacks"
 
@@ -1087,6 +1168,7 @@ cd "${workshop_dir}/stacks"
 
 Then we inspect the changes to ensure the old version was replaced across all affected files:
 
+Windows users should execute the commands from a Cygwin shell:
 ```
 find ./experimental/java-microprofile-dev-mode -type f -exec grep "0.3" {} \; -print 
 version: 0.3.1
@@ -1118,8 +1200,7 @@ RUN mvn checkstyle:check install -DskipTests -Dcheckstyle.consoleOutput=true
 
 
 
-With the stack version and checkstyle goal updated, we can build the stack one last time:
-
+With the stack version and checkstyle goal updated, we can build the stack one last time (Windows users should execute the commands from a Cygwin shell):
 ```
 cd "${workshop_dir}/stacks"
 ./ci/build.sh . experimental/java-microprofile-dev-mode
@@ -1143,20 +1224,13 @@ With the new stack generated, the application architect will notify developers w
 
 Modify the version in "${workshop_dir}/java-example/.appsody-config.yaml" from 0.2 to 0.3
 
-After saving the modification, you should see the following output:
+After saving the modification, you should see the following contents for .appsody-config.yaml:
 
 ```
-> cat .appsody-config.yaml
 stack: appsody/java-microprofile-dev-mode:0.3
 ```
 
 Now modify the version in "pom.xml" from 0.2.10 to 0.3.1.
-After saving the modification, you should see the following output:
-
-```
-> grep 0.3 pom.xml
-        <version>0.3.1</version>
-```
 
 With the new changes in place, and with the application updated to use the latest version of the stack, requests to `appsody build` will fail in case of static analysis errors:
 
