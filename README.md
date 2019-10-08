@@ -922,7 +922,7 @@ The workshop will cover various aspects of the customization of an existing coll
 
 ### Stacks ###
 
-ftuninA [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may  to specify different tuning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
+A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may specify different tuning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
 
 You can study the internal file structure of a stack in more detail [here](https://appsody.dev/docs/stacks/stack-structure).
 
@@ -1257,4 +1257,4 @@ With the new changes in place, and with the application updated to use the lates
 
 #### Further reading: Development versus production behaviour ####
 
-The previous scenario showed a simple change, but Kabanero collections can accommodate more sophisticated behaviours, where the container image is setup with additional debugging capabilitites during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behaviour can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
+The previous scenario showed a simple change, but Kabanero collections can accommodate more sophisticated behaviours, where the container image is setup with additional debugging capabilities during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behaviour can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
