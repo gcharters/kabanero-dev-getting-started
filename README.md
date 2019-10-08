@@ -401,7 +401,7 @@ Save the file.  You'll see a message that `liberty:dev` mode does not handle `po
 A CWWKZ0001I: Application starter-app started in 9.393 seconds..
 ```
 
-Note for Windows users: Due to a known [Docker issue on ](https://github.com/docker/for-win/issues/56#issuecomment-242135705) , containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to use a docker command to trigger the change:
+Note for Windows users: Due to a known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705), containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to use a docker command to trigger the change:
 
 ```
 docker exec -it java-example-dev sh -c "touch /project/user-app/pom.xml"
@@ -448,7 +448,7 @@ You should see that upon saving the file the source is compiled and the applicat
 [Container] [INFO] [AUDIT   ] CWWKZ0003I: The application starter-app updated in 1.447 seconds.
 ```
 
-Note for Windows users: Due to a known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705) , containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to use a docker command to trigger the change:
+Note for Windows users: Due to a known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705), containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to use a docker command to trigger the change:
 
 ```
 docker exec -it java-example-dev sh -c "find /project/user-app/src/main/java/dev/appsody/starter -exec touch {} \;"
@@ -770,7 +770,7 @@ Any changes you make to your code will automatically be built and re-deployed by
 
 For Windows users:
 
-- Due to the known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705) , containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to execute a `touch` command on the file to trigger the recompilation.  Right-click the Codewind "kabanero-mp-project" and select "Open Container Shell", then type the following command into the shell: 
+- Due to the known [Docker issue](https://github.com/docker/for-win/issues/56#issuecomment-242135705), containers are not notified about file changes made on the host filesystem, so the only way to trigger the notification is to execute a `touch` command on the file to trigger the recompilation.  Right-click the Codewind "kabanero-mp-project" and select "Open Container Shell", then type the following command into the shell: 
 
     ```touch src/main/java/dev/appsody/starter/StarterResource.java```
   
