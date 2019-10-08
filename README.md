@@ -289,7 +289,7 @@ mkdir -p ~/workspace/kabanero-workshop/java-example
 cd ~/workspace/kabanero-workshop/java-example
 ```
 
-Create the new project.  This project will using the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
+Create the new project.  This project will use the Java MicroProfile APIs defined at Eclipse and will run on the open source Open Liberty runtime running on Eclipse Open J9.
 
 ```
 appsody init workshop/java-microprofile-dev-mode
@@ -631,7 +631,7 @@ That's it for the Appsody part of the workshop.  You've seen how Appsody `stacks
 
 By default, Codewind has integration for the Appsody stacks released by the Appsody project.  However, the stack we're using is a custom one.  As we mentioned earlier, this could be a stack that's been designed to conform to company standards or industry compliance requirements, meaning we as developers don't need to worry about those things.  
 
-We've released the project to github, so you don't need to build the artefacts required by Codewind.
+We've released the project to github, so you don't need to build the artifacts required by Codewind.
 
 You need to edit a Codewind configuration file to point to the released repository.
 
@@ -856,8 +856,6 @@ Copy the deployment's URL into a browser. Congratulations! Your application is n
 
 ## Working with Appsody Collections
 
-_Introduce the Collection concept.  Talk about Stacks and Templates (these will have been talked about at a high level, but the details of the files will not have been covered._
-
 A collection includes everything you need to create a microservice in a single container image, along with an enterprise-grade deployment & integrated continuous delivery choice. Collections are developed by application architects to match their organizational and product requirements and work as the basis for applications created by application developers.
 
 A collection is defined by a combination of a stack (container images and application templates), build/CD conventions, and deployment best-practices. 
@@ -867,7 +865,7 @@ The workshop will cover various aspects of the customization of an existing coll
 
 ### Stacks ###
 
-A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may  to specify different tunning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
+A [stack](https://appsody.dev/docs/stacks/stacks-overview) contains at least one pre-built container image, with the resulting runtime being tailored to the target runtime. An application architect may  to specify different tuning parameters for a single image, such as dynamic code reloading for development environments, or provide distinct images for different purposes, such as an image stripped out of shell support for production environments.
 
 You can study the internal file structure of a stack in more detail [here](https://appsody.dev/docs/stacks/stack-structure).
 
@@ -1185,4 +1183,4 @@ With the new changes in place, and with the application updated to use the lates
 
 #### Further reading: Development versus production behaviour ####
 
-The previous scenario showed a simple change, but Kabanero collections can accommodate more sophisticated behaviours, where the container image is setup with additional debugging capabilitites during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behaviour can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
+The previous scenario showed a simple change, but Kabanero collections can accommodate more sophisticated behaviours, where the container image is setup with additional debugging capabilities during development and stripped out of those capabilities during production. This [Git pull request](https://github.com/appsody/stacks/pull/56) shows how that type of different behaviour can be achieved, by exploring the usage of [different modes of a stack](https://appsody.dev/docs/stacks/stack-structure): 'initialization', 'rapid local development', and 'build and deploy'. 
