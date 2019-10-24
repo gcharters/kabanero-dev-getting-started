@@ -173,13 +173,12 @@ function cacheStacks {
     (appsody run --name workshop_prep_container) & sleep ${sleepTime} ; kill -9 $!
     appsody stop --name workshop_prep_container
 
+    cd ${original_dir}
     rm -rf ${app_dir}
     docker rmi ${app_name}:latest
 
     echo "INFO: Clearing all temporary content"
     appsody repo remove ${appsody_repo}
-
-    cd ${original_dir}
 }
 
 
