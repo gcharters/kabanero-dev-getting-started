@@ -139,7 +139,7 @@ function cacheStacks {
 
     [[ $(appsody list | grep ${appsody_repo}) ]] && appsody repo remove ${appsody_repo}
     if [ ${cygwin} -eq 1 ]; then 
-        win_assets_dir=$(echo "${workshop_dir}/${stacks_subdir}/ci/assets" | sed "s|/cygdrive/c|c:|")
+        win_assets_dir=$(cygpath -w "${workshop_dir}/${stacks_subdir}/ci/assets" | sed 's|\\|\/|g')
         cmd /c "appsody repo add ${appsody_repo} file:///${win_assets_dir}/${collection_index}-index-local.yaml"
     else
         appsody repo add ${appsody_repo} file://${workshop_dir}/${stacks_subdir}/ci/assets/${collection_index}-index-local.yaml
@@ -480,17 +480,17 @@ echo "INFO: Workshop preparation ready at ${workshop_dir}"
 echo
 if [ ${cygwin} -eq 1 ]; then 
     env_win_file="${workshop_dir}/env.bat"
-    workshop_win_dir=$(echo ${workshop_dir} | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g")
+    workshop_win_dir=$(cygpath -w ${workshop_dir})
     cat > "${env_win_file}" << EOF
 set IMAGE_REGISTRY_ORG=kabanero
 set CODEWIND_INDEX=true
 set WORKSHOP_DIR=${workshop_win_dir}
 set workshop_dir=${workshop_win_dir}
-set workshop_url_dir=$(echo "${workshop_dir}" | sed "s|/cygdrive/\([a-z]\)|\1:|")
+set workshop_url_dir=$(echo "${workshop_win_dir}" | sed 's|\\|\/|g')
 EOF
 
     echo "INFO: Execute the following line in Windows Command Prompt to configure environment variables referenced in workshop instructions:"
-    echo "${env_win_file}" | sed "s|/cygdrive/\([a-z]\)|\1:|" | sed "s|/|\\\|g"
+    echo "$(cygpath -w ${env_win_file})"
     echo
     echo "INFO: Execute the following line in Cygwin shells to configure environment variables referenced in workshop instructions:"
 else
