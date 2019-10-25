@@ -256,6 +256,17 @@ function checksPrereqs {
         echo "INFO: git CLI installed: $(git version)"
     fi
 
+    gitVersionPrereqFailed=0
+    git_min_version="2.12"
+    git_version=$(git version | cut -d " " -f 3) 
+    $(vercomp ${git_version} ${git_min_version}) || gitVersionPrereqFailed=$?
+    if [ ${gitVersionPrereqFailed} -eq 2 ]; then
+        echo "ERROR: git CLI version must be ${git_min_version} or higher."
+        prereqFailed=1
+    else
+        echo "INFO: git CLI version [${git_version}] meets minimum requirements."
+    fi
+
     if [ ${is_java} -eq 1 ]; then
         python3PrereqFailed=0
         which python3 &> /dev/null || python3PrereqFailed=1
@@ -266,17 +277,14 @@ function checksPrereqs {
             echo "INFO: python3 CLI installed: $(python3 --version)"
         fi
 
-        # 
-        # checking for pip3 version or if they have an 
-        # alias setup for pip3 as pip 
-        #
-        pipPrereqFailed=0
-        pip3 -V &> /dev/null || pipPrereqFailed=1
+        pipPrereqFailed=1
+        pip -V > /dev/null 2>&1 && pipPrereqFailed=0
+        pip3 -V > /dev/null 2>&1 && pipPrereqFailed=0
         if [ ${pipPrereqFailed} -eq 1 ]; then
-            echo "ERROR: pip3 cannot be found."
+            echo "ERROR: pip cannot be found."
             prereqFailed=1
         else
-            echo "INFO: pip3 CLI installed: $(pip3 -V)"
+            echo "INFO: pip CLI installed"
         fi
     fi
 
@@ -326,7 +334,7 @@ function checksPrereqs {
         kubectl_current_context=$(kubectl config current-context)
         if [ ! "${kubectl_current_context}" == "docker-desktop" ] &&
         [ ! "${kubectl_current_context}" == "docker-for-desktop" ]; then
-            echo "ERROR: kubectl CLI context is not set to \"docker-destop\""
+            echo "ERROR: kubectl CLI context is not set to \"docker-desktop\""
             echo "ERROR: This workshop has been tested with the Kubernetes cluster built into docker-destop."
             echo "ERROR: Set kubectl to the \"docker-desktop\" context by running: \"kubectl config set-context docker-desktop\""
             prereqFailed=1
