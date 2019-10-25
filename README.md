@@ -104,7 +104,7 @@ In addition to checking prerequisites, this step will also cache large images in
 (Windows users should execute it from a Cygwin shell) :
 
 ```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.2/workshop-setup.sh | bash
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.4/workshop-setup.sh | bash -s -- -p
 ```
 
 
