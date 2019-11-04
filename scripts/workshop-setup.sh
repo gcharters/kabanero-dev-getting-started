@@ -36,10 +36,11 @@ function usage() {
 # Ensures the Appsody stacks repo is cloned and up-to-date
 #
 function gitCloneStack {
-    rm -rf "${stacks_dir}"
-    mkdir -p ${workshop_dir}
-    cd "${workshop_dir}"
-    git clone ${git_repo_stacks}
+    if [ ! -e "${stacks_dir}" ]; then
+        mkdir -p ${workshop_dir}
+        cd "${workshop_dir}"
+        git clone ${git_repo_stacks}
+    fi
 }
 
 
