@@ -66,9 +66,9 @@ function cacheDockerImages {
     mkdir -p ${app_temp_dir}
     cd ${app_temp_dir}
     if [ ${cygwin} -eq 1 ]; then 
-        cmd /c 'appsody init appsodyhub/java-microprofile'
+        cmd /c 'appsody init incubator/java-microprofile'
     else
-        appsody init appsodyhub/java-microprofile
+        appsody init incubator/java-microprofile
     fi
     opendjk_local_docker_context_dir="${app_temp_dir}/tmp"
     if [ ${cygwin} -eq 1 ]; then 
@@ -237,7 +237,7 @@ function checksPrereqs {
     fi
 
     appsodyVersionPrereqFailed=0
-    appsody_min_version="0.4.6"
+    appsody_min_version="0.4.8"
     appsody_version=$(appsody version | cut -d " " -f 2) 
     $(vercomp ${appsody_version} ${appsody_min_version}) || appsodyVersionPrereqFailed=$?
     if [ ${appsodyVersionPrereqFailed} -eq 2 ]; then
