@@ -24,6 +24,8 @@ function usage() {
     echo "  -p  | --check-prereqs"
     echo "                     Verifies the presence and correct versions of workshop"
     echo "                     prerequisites."
+    echo "  -c  | --cache-prereqs"
+    echo "                     Downloads pre-requisite images and pre-builds local stacks."
     echo "  -l  | --language   Workshop programming language. Accepted values are \"java\" and \"nodejs\""
     echo "                     The default programming language is ${workshop_collection}."
     echo ""
@@ -384,6 +386,7 @@ esac
 
 
 check=0
+cache=0
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -391,6 +394,9 @@ shift
 case $key in
     -p|--check-prereqs)
     check=1
+    ;;
+    -c|--cache-prereqs)
+    cache=1
     ;;
     -l|--language)
     workshop_collection=$1
@@ -447,38 +453,39 @@ esac
 [ ${check} -eq 1 ] && checksPrereqs
 result=$?
 
-if [ ${is_java} -eq 1 ] && [ ${result} -eq 0 ]; then
+if [ ${cache} -eq 1 ] && [ ${is_java} -eq 1 ] && [ ${result} -eq 0 ]; then
     echo
     cacheDockerImages
     result=$?
 fi
 
-if [ ${result} -eq 0 ]; then
+if [ ${cache} -eq 1 ] && [ ${result} -eq 0 ]; then
     echo
     cacheStacks
     result=$?
 fi
 
 
-#
-# Environment settings
-#
-env_file="${workshop_dir}/env.sh"
-cat > "${env_file}" << EOF
+if [ ${result} -eq 0 ]; then
+    #
+    # Environment settings
+    #
+    env_file="${workshop_dir}/env.sh"
+    cat > "${env_file}" << EOF
 export IMAGE_REGISTRY_ORG=kabanero
 export CODEWIND_INDEX=true
 export WORKSHOP_DIR=${workshop_dir}
 export workshop_dir=${workshop_dir}
 EOF
-chmod u+x "${env_file}"
+    chmod u+x "${env_file}"
 
-echo
-echo "INFO: Workshop preparation ready at ${workshop_dir}"
-echo
-if [ ${cygwin} -eq 1 ]; then 
-    env_win_file="${workshop_dir}/env.bat"
-    workshop_win_dir=$(cygpath -w ${workshop_dir})
-    cat > "${env_win_file}" << EOF
+    echo
+    echo "INFO: Workshop preparation ready at ${workshop_dir}"
+    echo
+    if [ ${cygwin} -eq 1 ]; then 
+        env_win_file="${workshop_dir}/env.bat"
+        workshop_win_dir=$(cygpath -w ${workshop_dir})
+        cat > "${env_win_file}" << EOF
 set IMAGE_REGISTRY_ORG=kabanero
 set CODEWIND_INDEX=true
 set WORKSHOP_DIR=${workshop_win_dir}
@@ -486,14 +493,15 @@ set workshop_dir=${workshop_win_dir}
 set workshop_url_dir=$(echo "${workshop_win_dir}" | sed 's|\\|\/|g')
 EOF
 
-    echo "INFO: Execute the following line in Windows Command Prompt to configure environment variables referenced in workshop instructions:"
-    echo "$(cygpath -w ${env_win_file})"
+        echo "INFO: Execute the following line in Windows Command Prompt to configure environment variables referenced in workshop instructions:"
+        echo "$(cygpath -w ${env_win_file})"
+        echo
+        echo "INFO: Execute the following line in Cygwin shells to configure environment variables referenced in workshop instructions:"
+    else
+        echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
+    fi
+    echo "eval \$(cat ${workshop_dir}/env.sh)"
     echo
-    echo "INFO: Execute the following line in Cygwin shells to configure environment variables referenced in workshop instructions:"
-else
-    echo "INFO: Execute the following line to configure environment variables referenced in workshop instructions:"
 fi
-echo "eval \$(cat ${workshop_dir}/env.sh)"
-echo
 
 exit ${result}
