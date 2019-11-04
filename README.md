@@ -17,7 +17,8 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
       - [Installing the Codewind Extension for Visual Studio Code](#installing-the-codewind-extension-for-visual-studio-code)
     - [Installing the Appsody CLI](#installing-the-appsody-cli)
       - [Sharing the Appsody Configuration between the CLI and Visual Studio Code - Optional](#sharing-the-appsody-configuration-between-the-cli-and-visual-studio-code---optional)
-    - [Pre-requisite checks and caching of large images](#pre-requisite-checks-and-caching-of-large-images)
+    - [Pre-requisite checks](#pre-requisite-checks)
+    - [Caching of large images](#caching-of-large-images)
   - [Developing Cloud-native applications - Appsody](#developing-cloud-native-applications---appsody)
     - [Getting to know Appsody](#getting-to-know-appsody)
     - [Creating a new Project with Appsody](#creating-a-new-project-with-appsody)
@@ -37,7 +38,7 @@ At the end of this tutorial, you should have a good understanding of the Kabaner
     - [Build/CD](#buildcd)
       - [Collection Scenario 3: Add static code verification to build process](#collection-scenario-3-add-static-code-verification-to-build-process)
       - [Collection Scenario 4: Stack versioning](#collection-scenario-4-stack-versioning)
-
+      - [Further reading: Development versus production behaviour](#further-reading-development-versus-production-behaviour)
 ## Before You Begin
 Before you get started, there are a number of pre-reqs you'll need to install.  These are the pre-reqs for developing a Java MicroProfile application using Kabanero.  Different pre-reqs will be required for other application stacks.
 
@@ -95,16 +96,30 @@ To share the Appsody configuration, follow the instructions at [this repository]
 
 
 
-### Pre-requisite checks and caching of large images
+### Pre-requisite checks
 
 This step will ensure your environment has all the prerequisites installed and running.
-
-In addition to checking prerequisites, this step will also cache large images into your local system. The cached content will save you valuable time at the beginning of the workshop.
 
 (Windows users should execute it from a Cygwin shell) :
 
 ```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.4/workshop-setup.sh | bash -s -- -p
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.5/workshop-setup.sh | bash -s -- -p -l java
+```
+
+
+### Caching of large images
+
+This step will ensure your environment has all the prerequisites
+installed and running.
+
+In addition to checking prerequisites, this step will also cache large
+images into your local system. The cached content will save you valuable
+time throughout the course of this tutorial.
+
+(Windows users should execute it from a Cygwin shell) :
+
+```
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.5/workshop-setup.sh | bash -s -- -c -l java
 ```
 
 

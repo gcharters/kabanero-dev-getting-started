@@ -450,8 +450,11 @@ case ${workshop_collection} in
 esac
 
 
-[ ${check} -eq 1 ] && checksPrereqs
-result=$?
+result=0
+if [ ${check} -eq 1 ]; then
+    checksPrereqs
+    result=$?
+fi
 
 if [ ${cache} -eq 1 ] && [ ${is_java} -eq 1 ] && [ ${result} -eq 0 ]; then
     echo
