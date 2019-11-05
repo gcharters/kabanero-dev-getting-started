@@ -128,11 +128,11 @@ function cacheStacks {
     [ ${is_java} -eq 1 ] && mkdir -p ~/.m2
     cd ${stacks_dir}
     if [ ${is_java} -eq 1 ]; then
-        CODEWIND_INDEX=true ./ci/build.sh . ${collection_path}
+        CODEWIND_INDEX=false ./ci/build.sh . ${collection_path}
     else
         cd ${collection_path}
         [[ $(appsody list | grep dev-local) ]] && appsody repo remove dev-local
-        IMAGE_REGISTRY_ORG=kabanero CODEWIND_INDEX=true appsody stack package
+        IMAGE_REGISTRY_ORG=kabanero CODEWIND_INDEX=false appsody stack package
         return
     fi
 
@@ -473,10 +473,11 @@ if [ ${result} -eq 0 ]; then
     #
     # Environment settings
     #
+    mkdir -p "${workshop_dir}"
     env_file="${workshop_dir}/env.sh"
     cat > "${env_file}" << EOF
 export IMAGE_REGISTRY_ORG=kabanero
-export CODEWIND_INDEX=true
+export CODEWIND_INDEX=false
 export WORKSHOP_DIR=${workshop_dir}
 export workshop_dir=${workshop_dir}
 EOF
@@ -490,7 +491,7 @@ EOF
         workshop_win_dir=$(cygpath -w ${workshop_dir})
         cat > "${env_win_file}" << EOF
 set IMAGE_REGISTRY_ORG=kabanero
-set CODEWIND_INDEX=true
+set CODEWIND_INDEX=false
 set WORKSHOP_DIR=${workshop_win_dir}
 set workshop_dir=${workshop_win_dir}
 set workshop_url_dir=$(echo "${workshop_win_dir}" | sed 's|\\|\/|g')
