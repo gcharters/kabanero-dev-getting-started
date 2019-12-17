@@ -174,7 +174,6 @@ function cacheStacks {
 
     cd ${original_dir}
     rm -rf ${app_dir}
-    docker rmi ${app_name}:latest
 
     echo "INFO: Clearing all temporary content"
     appsody repo remove ${appsody_repo}
@@ -236,7 +235,7 @@ function checksPrereqs {
     fi
 
     appsodyVersionPrereqFailed=0
-    appsody_min_version="0.4.8"
+    appsody_min_version="0.5.3"
     appsody_version=$(appsody version | cut -d " " -f 2) 
     $(vercomp ${appsody_version} ${appsody_min_version}) || appsodyVersionPrereqFailed=$?
     if [ ${appsodyVersionPrereqFailed} -eq 2 ]; then
