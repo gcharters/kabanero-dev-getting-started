@@ -103,7 +103,7 @@ This step will ensure your environment has all the prerequisites installed and r
 (Windows users should execute it from a Cygwin shell) :
 
 ```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.5/workshop-setup.sh | bash -s -- -p -l java
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.6/workshop-setup.sh | bash -s -- -p -l java
 ```
 
 
@@ -119,7 +119,7 @@ time throughout the course of this tutorial.
 (Windows users should execute it from a Cygwin shell) :
 
 ```
-curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.5/workshop-setup.sh | bash -s -- -c -l java
+curl -sL https://github.com/gcharters/kabanero-dev-getting-started/releases/download/0.0.6/workshop-setup.sh | bash -s -- -c -l java
 ```
 
 
