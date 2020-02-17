@@ -47,7 +47,7 @@ public class PaasProperties {
 		// TODO: Replace the bindingEnv assignment with reading the credentials 
 		// from a secret variable or mounted file.
 
-		String bindingEnv = "{\"jdbcurl\": \"jdbc:postgresql://172.17.0.2:5432/\"," +
+		String bindingEnv = "{\"jdbcurl\": \"jdbc:postgresql://workshop-postgres:5432/\"," +
 				"\"username\": \"postgres\"," +
 				"\"password\": \"mysecretpassword\"}";
 		if (null != bindingEnv) {
