@@ -1,3 +1,9 @@
+# Deprecation notice
+As of March 1st 2020, this tutorial will still work, but the underlying incubator/java-microprofile stack has been replaced with the new and improved incubator/java-openprofile stack.
+
+We recommend that you use the regular [Kabanero Guides](kabanero.io/guides) and the many articles on developer.ibm.com ([Appsody](https://developer.ibm.com/?s=appsody), [Codewind](https://developer.ibm.com/?s=codewind) and [Kabanero](https://developer.ibm.com/?s=kabanero))
+
+
 # Kabanero Developer Experience - Getting Started
 
 Kabanero is an open source project focused on bringing together key foundational open source technologies into a framework for developing and deploying modern cloud-native applications.  The Kabanero developer experience leverages the Appsody and Eclipse Codewind open source projects enabling developers to use project 'templates' to rapidly create new cloud-native applications, develop and build them in a curated container 'stack' environment and deploy them to Knative/Kubernetes all without the need for container or Kubernetes skills.
